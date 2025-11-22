@@ -137,6 +137,28 @@ Visit the application at [http://127.0.0.1:8000/](http://127.0.0.1:8000/).
 - **Permissions**: Full system access - manage all users, courses, quizzes, and system settings
 - **Restrictions**: Cannot be created or modified through the web interface
 
+### Steps to Create Super User
+- Run these commands in terminal 
+```bash
+# Make sure Database and tables are created 
+python manage.py makemigrations
+python manage.py migrate
+
+# Now run this command
+python manage.py createsuperuser
+
+# DJANGO will prompt you for three things
+username:
+# optional you can skip this by entering
+email (optional): 
+password: 
+```
+
+- After creating a superuser now you can login to application using the superuser you just created
+- After logging in, make sure to goto settings and update your information such as:
+**First Name**, **Last Name** and **Gender**
+
+![Screenshot](assets/admin_settings.png)
 
 ### Staff/Instructor
 - **Creation**: Registered through the web interface by administrators or other staff members
