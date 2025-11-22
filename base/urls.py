@@ -61,6 +61,11 @@ urlpatterns = [
     path('view_complaints/', views.view_complaints, name='view_complaints'),
 
     # ===============================
+    # Email Settings URL
+    # ===============================
+    path('email-settings/', views.email_settings, name='email_settings'),
+
+    # ===============================
     # Rankings URL
     # ===============================
     path('view_overall_rank/', views.view_overall_rank, name='view_overall_rank'),
