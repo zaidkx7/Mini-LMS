@@ -15,17 +15,48 @@ This project was initially created as a practice exercise to explore web develop
 
 ## Features
 
-- User authentication and management
-- Course creation and management
-- Integrated admin dashboard
-- Database-backed storage using SQLite
-- Quiz management and participation to enhance learning
-- Coding challenges for hands-on practice
-- Exam preparation tools to improve performance
-- Three user categories with different permissions:
-  1. **Super User**: Has no restrictions and can manage the entire platform.
-  2. **Staff User**: Has some restrictions and can perform specific administrative tasks.
-  3. **Ordinary User**: Can upload quizzes and view their marks and rankings.
+- **User Authentication and Management**
+  - Secure user registration and login system
+  - Role-based access control with three user types
+  - User profile management with gender-specific avatars
+  - Account suspension/activation functionality
+
+- **Course and Quiz Management**
+  - Create and manage multiple courses
+  - Quiz creation with file attachments (help files)
+  - Due date tracking and submission deadlines
+  - Support for multiple file types (PDF, DOC, DOCX, ZIP, TXT, CPP, PY)
+
+- **Enhanced Dashboard**
+  - Six informative metric cards showing:
+    - Total Courses
+    - Quizzes Submitted
+    - Total Marks
+    - Total Quizzes Available
+    - Pending Quizzes
+    - Average Score
+  - Responsive design for mobile and desktop
+  - Real-time progress tracking
+
+- **Grading and Feedback System**
+  - Staff can grade submissions with marks (0-10 scale)
+  - Add detailed remarks/feedback for each submission
+  - Students can view their grades and instructor feedback
+  - Automatic mark calculation and aggregation
+
+- **Ranking System**
+  - Overall student rankings based on total marks
+  - View your current rank position
+  - Compare performance with peers
+
+- **Complaint System**
+  - Students can submit complaints/feedback
+  - Staff can view and manage all complaints
+
+- **User Role System**
+  - **Administrator (Superuser)**: Only one administrator, created via Django command. Has full system access and cannot be modified through UI
+  - **Staff/Instructor**: Can manage courses, quizzes, grade submissions, view all student data, and register new users
+  - **Student**: Can view courses, submit quizzes, view grades, check rankings, and submit complaints
 
 ---
 
@@ -45,8 +76,8 @@ Ensure you have the following installed on your system:
 
 #### 1. Clone the Repository
 ```bash
-git clone https://github.com/your-username/Django-LMS.git
-cd Django-LMS
+git clone https://github.com/your-username/Mini-LMS.git
+cd Mini-LMS
 ```
 
 #### 2. Set Up a Virtual Environment (Optional but Recommended)
@@ -61,20 +92,35 @@ python -m venv .venv # to create virtual environment
 pip install -r requirements.txt
 ```
 
-#### 4. Run Database Migrations
+#### 4. Configure Environment Variables
+Create a `.env` file in the project root directory:
+```bash
+cp .env.example .env
+```
+
+Edit the `.env` file and configure the following variables:
+- `SECRET_KEY`: Django secret key (generate a new one for production)
+- `DEBUG`: Set to `True` for development, `False` for production
+- `ALLOWED_HOSTS`: Comma-separated list of allowed hosts
+- Email configuration (optional, for notifications)
+
+#### 5. Run Database Migrations
 ```bash
 python manage.py makemigrations
 python manage.py migrate
 ```
 
-#### 5. Create a Superuser (Optional, but a default superuser is already provided)
+#### 6. Create a Superuser/Administrator
+**Important:** There should be only ONE administrator account. Create it using Django's command:
 ```bash
 python manage.py createsuperuser
 ```
 
-Follow the prompts to set up a username, email, and password.
+Follow the prompts to set up a username, password, and email. This will be your main administrator account.
 
-#### 6. Start the Development Server
+**Note:** Additional users (Students and Staff) should be registered through the web interface by the administrator or staff members.
+
+#### 7. Start the Development Server
 ```bash
 python manage.py runserver
 ```
@@ -83,24 +129,43 @@ Visit the application at [http://127.0.0.1:8000/](http://127.0.0.1:8000/).
 
 ---
 
-## Default Superuser Credentials
-The project comes with a pre-configured superuser:
+## User Roles and Permissions
 
-- **Username**: 14717
-- **Password**: zaidk14717
+### Administrator (Superuser)
+- **Creation**: Must be created via Django command (`python manage.py createsuperuser`)
+- **Quantity**: Only ONE administrator should exist in the system
+- **Permissions**: Full system access - manage all users, courses, quizzes, and system settings
+- **Restrictions**: Cannot be created or modified through the web interface
 
-For security purposes, it is recommended to change the password of this superuser after deploying the project.
 
-```bash
-python manage.py changepassword admin
-```
+### Staff/Instructor
+- **Creation**: Registered through the web interface by administrators or other staff members
+- **Permissions**:
+  - Create and manage courses
+  - Create and manage quizzes
+  - Grade student submissions
+  - Add remarks/feedback
+  - View all student data
+  - Register new students and staff
+  - Manage user roles (Student ↔ Staff only)
+- **Restrictions**: Cannot modify administrator accounts
+
+### Student
+- **Creation**: Registered through the web interface by administrators or staff members
+- **Permissions**:
+  - View enrolled courses
+  - Submit quizzes before deadlines
+  - View their own grades and feedback
+  - Check their ranking
+  - Submit complaints/feedback
+- **Restrictions**: Cannot access administrative functions
 
 ---
 
 ## Project Structure
 
 ```
-Django-LMS/
+Mini-LMS/
 ├── base/               # Base templates and utilities
 ├── studybud/           # Core application logic
 ├── db.sqlite3          # SQLite database file

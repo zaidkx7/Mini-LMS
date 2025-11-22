@@ -17,7 +17,7 @@
         </a>
         <div>
           <h1 class="text-2xl font-semibold text-gray-900">Register New User</h1>
-          <p class="mt-1 text-sm text-gray-600">Create a new student account</p>
+          <p class="mt-1 text-sm text-gray-600">Create a new student, staff, or administrator account</p>
         </div>
       </div>
     </div>
@@ -100,21 +100,40 @@
             </div>
           </div>
 
-          <!-- Gender -->
-          <div>
-            <label for="gender" class="block text-sm font-medium text-gray-700 mb-2">
-              Gender <span class="text-red-600">*</span>
-            </label>
-            <select
-              id="gender"
-              name="gender"
-              required
-              class="block w-full rounded-md border border-gray-300 py-2.5 px-3 text-gray-900 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/20 sm:text-sm"
-            >
-              <option value="">Select gender</option>
-              <option value="Male">Male</option>
-              <option value="Female">Female</option>
-            </select>
+          <!-- Gender and Role -->
+          <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+            <div>
+              <label for="gender" class="block text-sm font-medium text-gray-700 mb-2">
+                Gender <span class="text-red-600">*</span>
+              </label>
+              <select
+                id="gender"
+                name="gender"
+                required
+                class="block w-full rounded-md border border-gray-300 py-2.5 px-3 text-gray-900 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/20 sm:text-sm"
+              >
+                <option value="">Select gender</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+              </select>
+            </div>
+
+            <div>
+              <label for="role" class="block text-sm font-medium text-gray-700 mb-2">
+                User Role <span class="text-red-600">*</span>
+              </label>
+              <select
+                id="role"
+                name="role"
+                required
+                class="block w-full rounded-md border border-gray-300 py-2.5 px-3 text-gray-900 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/20 sm:text-sm"
+              >
+                <option value="">Select role</option>
+                <option value="student">Student</option>
+                <option value="staff">Staff/Instructor</option>
+              </select>
+              <p class="mt-2 text-xs text-gray-500">Note: Administrator accounts can only be created via Django command</p>
+            </div>
           </div>
 
           <!-- Password Fields -->
@@ -190,9 +209,10 @@
             <p class="font-medium mb-1">Registration Guidelines:</p>
             <ul class="list-disc list-inside space-y-1 ml-2">
               <li>Use a unique registration number for each user</li>
+              <li>Email is optional but recommended for receiving notifications</li>
+              <li>Select the appropriate role: Student or Staff</li>
               <li>Password must be at least 8 characters long</li>
-              <li>User will need to login with their registration number and password</li>
-              <li>Default role will be "Student" - change later if needed</li>
+              <li>User will login with their registration number and password</li>
             </ul>
           </div>
         </div>

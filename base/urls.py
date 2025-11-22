@@ -11,6 +11,7 @@ urlpatterns = [
     path('login/', views.loginUser, name='login'),
     path('logout/', views.logoutUser, name='logout'),
     path('change_password/', views.change_password, name='change_password'),
+    path('settings/', views.settings, name='settings'),
 
     # ===============================
     # User Management URLs

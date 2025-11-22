@@ -27,12 +27,18 @@ def loginUser(request):
             return redirect('login')
         user = authenticate(request, username=reg_no, password=password)
         if user is not None:
-            if user.studentprofile.active_status:  
-                login(request, user)
-                return redirect('dashboard')
-            else:
-                messages.error(request, 'Account Suspended. Contact the Administrator.')
-                return redirect('login')
+            # Check if user has a student profile (superusers might not have one)
+            try:
+                profile = StudentProfile.objects.get(user=user)
+                if not profile.active_status:
+                    messages.error(request, 'Account Suspended. Contact the Administrator.')
+                    return redirect('login')
+            except StudentProfile.DoesNotExist:
+                # Create profile for users without one (like superusers)
+                StudentProfile.objects.create(user=user, gender='Male', active_status=True)
+
+            login(request, user)
+            return redirect('dashboard')
         else:
             messages.error(request, 'Registration number or Password is incorrect')
     return render(request, 'base/login.html')
@@ -64,6 +70,47 @@ def change_password(request):
         return redirect('dashboard')
     return render(request, 'base/change_password.html')
 
+@login_required
+def settings(request):
+    user = request.user
+
+    # Get or create student profile for the user
+    try:
+        profile = StudentProfile.objects.get(user=user)
+    except StudentProfile.DoesNotExist:
+        profile = StudentProfile.objects.create(user=user, gender='Male')
+
+    if request.method == 'POST':
+        first_name = request.POST.get('first_name')
+        last_name = request.POST.get('last_name')
+        email = request.POST.get('email')
+        gender = request.POST.get('gender')
+
+        # Validate required fields
+        if not all([first_name, last_name, gender]):
+            messages.error(request, 'Please fill in all required fields')
+            return redirect('settings')
+
+        # Update user information
+        user.first_name = first_name
+        user.last_name = last_name
+        user.email = email if email else ''
+        user.save()
+
+        # Update profile gender
+        profile.gender = gender
+        profile.save()
+
+        messages.success(request, 'Your profile has been updated successfully!')
+        return redirect('settings')
+
+    context = {
+        'user': user,
+        'profile': profile,
+    }
+
+    return render(request, 'base/settings.html', context)
+
 # ===============================
 # User Management Views
 # ===============================
@@ -76,13 +123,49 @@ def register_student(request):
         first_name = request.POST.get('first_name')
         last_name = request.POST.get('last_name')
         gender = request.POST.get('gender')
-        if not reg_no or not password or not first_name or not last_name or not gender:
-            messages.error(request, 'Please fill in all fields')
+        role = request.POST.get('role')
+
+        # Validate required fields
+        if not all([reg_no, password, first_name, last_name, gender, role]):
+            messages.error(request, 'Please fill in all required fields')
             return redirect('register_student')
-        user = User.objects.create_user(username=reg_no, password=password, first_name=first_name, last_name=last_name)
+
+        # Only allow student/staff roles (admin can only be created via Django command)
+        if role not in ['student', 'staff']:
+            messages.error(request, 'Invalid role selection. Only Student or Staff roles are allowed.')
+            return redirect('register_student')
+
+        # Check if username already exists
+        if User.objects.filter(username=reg_no).exists():
+            messages.error(request, 'This registration number already exists')
+            return redirect('register_student')
+
+        # Create user
+        user = User.objects.create_user(
+            username=reg_no,
+            password=password,
+            first_name=first_name,
+            last_name=last_name
+        )
+
+        # Set user role based on selection (only student or staff allowed)
+        if role == 'student':
+            user.is_staff = False
+            user.is_superuser = False
+        elif role == 'staff':
+            user.is_staff = True
+            user.is_superuser = False
+
+        user.save()
+
+        # Create student profile
         student_profile = StudentProfile.objects.create(user=user, gender=gender)
-        messages.success(request, 'Student registered successfully')
-        return redirect('dashboard')
+
+        # Success message based on role
+        role_name = 'Staff' if role == 'staff' else 'Student'
+        messages.success(request, f'{role_name} registered successfully')
+        return redirect('registered_students')
+
     return render(request, 'base/register_student.html')
 
 @staff_member_required(login_url='dashboard')
@@ -127,23 +210,46 @@ def delete_staff(request, staff_id):
 @staff_member_required(login_url='dashboard')
 def change_role(request, student_id):
     student = get_object_or_404(User, id=student_id)
+
+    # Prevent users from changing their own role
+    if student.id == request.user.id:
+        messages.error(request, 'You cannot change your own role')
+        return redirect('registered_students')
+
+    # Prevent changing administrator role (there should be only one superuser)
+    if student.is_superuser:
+        messages.error(request, 'Administrator role cannot be changed. There should be only one superuser created via Django command.')
+        return redirect('registered_students')
+
     if request.method == 'POST':
         role = request.POST.get('role')
+
         if not role:
             messages.error(request, 'Please select a role')
             return redirect('change_role', student_id)
+
+        # Only allow student/staff roles (admin cannot be assigned via UI)
+        if role not in ['student', 'staff']:
+            messages.error(request, 'Invalid role selection. Only Student or Staff roles are allowed.')
+            return redirect('change_role', student_id)
+
+        # Apply role change
         if role == 'student':
             student.is_staff = False
             student.is_superuser = False
         elif role == 'staff':
             student.is_staff = True
             student.is_superuser = False
-        elif role == 'super_user':
-            student.is_superuser = True
+
         student.save()
         messages.success(request, 'Role changed successfully')
         return redirect('registered_students')
-    return render(request, 'base/change_role.html', {'student': student})
+
+    context = {
+        'student': student,
+    }
+
+    return render(request, 'base/change_role.html', context)
 
 @staff_member_required(login_url='dashboard')
 def suspend_user(request, user_id):
@@ -176,11 +282,40 @@ def dashboard(request):
     total_submissions = sum(submission_counts.values())
     total_marks = sum(marks_sums.values())
 
+    # New metrics for expanded dashboard
+    total_quizzes_available = quizzes.count()
+    pending_quizzes = total_quizzes_available - total_submissions
+
+    # Calculate average score (handle division by zero)
+    graded_submissions = submissions.filter(marks__isnull=False)
+    if graded_submissions.count() > 0:
+        average_score = graded_submissions.aggregate(avg=Sum('marks'))['avg'] / graded_submissions.count()
+        average_score = round(average_score, 2)
+    else:
+        average_score = 0
+
     user_agent = request.META.get('HTTP_USER_AGENT')
     user_ip = request.META.get('REMOTE_ADDR')
     device_info = httpagentparser.detect(user_agent)
     device_type = device_info.get("platform", {}).get("name", "Unknown Device")
-    return render(request, 'base/dashboard.html', {'courses': courses, 'quizzes': quizzes, 'submissions': submissions, 'submission_counts': submission_counts, 'marks_sums': marks_sums, 'total_submissions': total_submissions, 'total_marks': total_marks, 'user_agent': user_agent, 'user_ip': user_ip, 'device_type': device_type})
+
+    context = {
+        'courses': courses,
+        'quizzes': quizzes,
+        'submissions': submissions,
+        'submission_counts': submission_counts,
+        'marks_sums': marks_sums,
+        'total_submissions': total_submissions,
+        'total_marks': total_marks,
+        'total_quizzes_available': total_quizzes_available,
+        'pending_quizzes': pending_quizzes,
+        'average_score': average_score,
+        'user_agent': user_agent,
+        'user_ip': user_ip,
+        'device_type': device_type
+    }
+
+    return render(request, 'base/dashboard.html', context)
 
 # ===============================
 # Course Management Views

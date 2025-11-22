@@ -1,3 +1,23 @@
-django-ckeditor-5
-django
-httpagentparser
+# Core Framework
+Django==5.2.8
+
+# CKEditor for rich text editing
+django-ckeditor-5==0.2.18
+
+# User agent parsing for device detection
+httpagentparser==1.9.5
+
+# Environment variable management
+python-decouple==3.8
+
+# Image processing for profile pictures and uploads
+Pillow==12.0.0
+
+# Database utilities
+sqlparse==0.5.3
+
+# Timezone support
+tzdata==2025.2
+
+# ASGI server support
+asgiref==3.11.0
