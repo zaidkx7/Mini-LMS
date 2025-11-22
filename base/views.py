@@ -1,7 +1,7 @@
 from django.shortcuts import render
-from .forms import RemarksForm, QuizAddingForm, StudentComplaintsForm
-from .models import Quiz, Submission, Courses, User, StudentProfile, StudentComplaints
-from django.contrib.auth.decorators import login_required
+from .forms import RemarksForm, QuizAddingForm, StudentComplaintsForm, EmailSettingsForm
+from .models import Quiz, Submission, Courses, User, StudentProfile, StudentComplaints, EmailSettings
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.shortcuts import get_object_or_404, redirect
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib import messages
@@ -10,7 +10,13 @@ from django.contrib.auth import authenticate, login, logout, update_session_auth
 from django.contrib.auth.hashers import check_password
 from django.shortcuts import render
 from django.db.models import Sum, Count, Q
+from django.core.mail import send_mail
+from django.template.loader import render_to_string
+from django.conf import settings
 import httpagentparser
+import logging
+
+logger = logging.getLogger(__name__)
 
 # ===============================
 # Authentication Views
@@ -127,6 +133,12 @@ def delete_staff(request, staff_id):
 @staff_member_required(login_url='dashboard')
 def change_role(request, student_id):
     student = get_object_or_404(User, id=student_id)
+
+    # Prevent users from changing their own role
+    if student == request.user:
+        messages.error(request, 'You cannot change your own role')
+        return redirect('registered_students')
+
     if request.method == 'POST':
         role = request.POST.get('role')
         if not role:
@@ -247,8 +259,15 @@ def add_quiz(request):
     if request.method == 'POST':
         form = QuizAddingForm(request.POST, request.FILES)
         if form.is_valid():
-            form.save()
+            quiz = form.save()
             messages.success(request, 'Quiz added successfully')
+
+            # Send email notification (wrapped in try/except to prevent upload failure)
+            try:
+                notify_quiz_uploaded(quiz, request.user)
+            except Exception as e:
+                logger.error(f"Failed to send quiz upload notification: {str(e)}")
+
             return redirect('quizzes', form.cleaned_data['course'].id)
     return render(request, 'base/add_quiz.html', {'courses': None, 'form': form})
 
@@ -295,8 +314,16 @@ def submit_quiz(request, quiz_id):
                 submission.file = file
                 submission.save()
             else:
-                Submission.objects.create(student=student, course=quiz.course, quiz=quiz, file=file)
+                submission = Submission.objects.create(student=student, course=quiz.course, quiz=quiz, file=file)
+
             messages.success(request, 'Quiz submitted successfully')
+
+            # Send email notification (wrapped in try/except to prevent submission failure)
+            try:
+                notify_quiz_submitted(submission)
+            except Exception as e:
+                logger.error(f"Failed to send quiz submission notification: {str(e)}")
+
             return redirect('quizzes', quiz.course.id)
         else:
             messages.error(request, 'Invalid file type. Please upload a PDF, DOC, DOCX, ZIP, or TXT file.')
@@ -404,3 +431,105 @@ def view_overall_rank(request):
         user['rank'] = idx + 1
     current_user_rank = next((item for item in rankings if item['student__id'] == request.user.id), None)
     return render(request, 'base/overall_rank.html', {'rankings': rankings, 'current_user_rank': current_user_rank})
+
+# ===============================
+# Email Notification Settings
+# ===============================
+
+@user_passes_test(lambda u: u.is_superuser, login_url='dashboard')
+def email_settings(request):
+    email_settings_instance = EmailSettings.get_settings()
+
+    if request.method == 'POST':
+        form = EmailSettingsForm(request.POST, instance=email_settings_instance)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Email notification settings updated successfully')
+            return redirect('email_settings')
+    else:
+        form = EmailSettingsForm(instance=email_settings_instance)
+
+    return render(request, 'base/email_settings.html', {'form': form})
+
+# ===============================
+# Email Notification Helper Functions
+# ===============================
+
+def send_notification_email(subject, message_html, recipient_list):
+    """
+    Send email notification to recipients.
+    Wrapped in try/except to prevent failures from affecting main operations.
+    """
+    try:
+        send_mail(
+            subject=subject,
+            message='',  # Plain text version (optional)
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=recipient_list,
+            html_message=message_html,
+            fail_silently=False,
+        )
+        logger.info(f"Email sent successfully to {recipient_list}")
+        return True
+    except Exception as e:
+        logger.error(f"Failed to send email: {str(e)}")
+        return False
+
+def notify_quiz_uploaded(quiz, uploaded_by):
+    """Send notification when a quiz is uploaded"""
+    email_settings = EmailSettings.get_settings()
+
+    if not email_settings.enable_quiz_upload_notifications:
+        return
+
+    # Get all staff/admin users
+    staff_users = User.objects.filter(Q(is_staff=True) | Q(is_superuser=True))
+    recipient_list = [user.email for user in staff_users if user.email]
+
+    if not recipient_list:
+        return
+
+    # Prepare email context
+    context = {
+        'quiz': quiz,
+        'course': quiz.course,
+        'uploaded_by': uploaded_by,
+        'due_date': quiz.due_date,
+        'quiz_url': f"{settings.ALLOWED_HOSTS[0]}/quizzes/{quiz.course.id}/" if settings.ALLOWED_HOSTS else "",
+    }
+
+    # Render HTML email
+    html_message = render_to_string('emails/quiz_uploaded.html', context)
+
+    subject = f"New Quiz Uploaded: {quiz.quiz_title} ({quiz.course.course_title})"
+    send_notification_email(subject, html_message, recipient_list)
+
+def notify_quiz_submitted(submission):
+    """Send notification when a quiz is submitted"""
+    email_settings = EmailSettings.get_settings()
+
+    if not email_settings.enable_submission_notifications:
+        return
+
+    # Get all staff/admin users
+    staff_users = User.objects.filter(Q(is_staff=True) | Q(is_superuser=True))
+    recipient_list = [user.email for user in staff_users if user.email]
+
+    if not recipient_list:
+        return
+
+    # Prepare email context
+    context = {
+        'submission': submission,
+        'student': submission.student,
+        'quiz': submission.quiz,
+        'course': submission.course,
+        'submitted_at': submission.submitted_at,
+        'submission_url': f"{settings.ALLOWED_HOSTS[0]}/view_quiz_submissions/{submission.quiz.id}/" if settings.ALLOWED_HOSTS else "",
+    }
+
+    # Render HTML email
+    html_message = render_to_string('emails/quiz_submitted.html', context)
+
+    subject = f"Quiz Submitted: {submission.quiz.quiz_title} by {submission.student.get_full_name() or submission.student.username}"
+    send_notification_email(subject, html_message, recipient_list)

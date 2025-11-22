@@ -1,0 +1,133 @@
+{% extends 'base/base_with_sidebar.html' %}
+{% load static %}
+
+{% block title %}Email Notification Settings - Mini LMS{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+  <div class="mx-auto max-w-3xl">
+
+    <!-- Page Header -->
+    <div class="mb-8">
+      <div class="flex items-center gap-3">
+        <a href="{% url 'dashboard' %}" class="inline-flex items-center justify-center h-10 w-10 rounded-md border border-gray-300 bg-white text-gray-600 hover:bg-gray-50 hover:text-gray-900">
+          <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+          </svg>
+        </a>
+        <div>
+          <h1 class="text-2xl font-semibold text-gray-900">Email Notification Settings</h1>
+          <p class="mt-1 text-sm text-gray-600">Configure email notifications for system events</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Settings Form Card -->
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+      <div class="border-b border-gray-200 px-6 py-4">
+        <div class="flex items-center gap-3">
+          <div class="flex h-10 w-10 items-center justify-center rounded-md bg-blue-100">
+            <svg class="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            </svg>
+          </div>
+          <div>
+            <h2 class="text-lg font-semibold text-gray-900">Notification Preferences</h2>
+            <p class="text-sm text-gray-600">Control when the system sends email notifications</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="p-6">
+        <form method="POST" class="space-y-6">
+          {% csrf_token %}
+
+          <!-- Quiz Upload Notifications -->
+          <div class="flex items-start">
+            <div class="flex h-5 items-center">
+              {{ form.enable_quiz_upload_notifications }}
+            </div>
+            <div class="ml-3">
+              <label for="{{ form.enable_quiz_upload_notifications.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                {{ form.enable_quiz_upload_notifications.label }}
+              </label>
+              <p class="text-sm text-gray-500 mt-1">
+                When enabled, all staff members will receive an email notification whenever a new quiz is uploaded to any course. The email includes quiz details, course information, due date, and a direct link.
+              </p>
+            </div>
+          </div>
+
+          <!-- Divider -->
+          <div class="border-t border-gray-200"></div>
+
+          <!-- Quiz Submission Notifications -->
+          <div class="flex items-start">
+            <div class="flex h-5 items-center">
+              {{ form.enable_submission_notifications }}
+            </div>
+            <div class="ml-3">
+              <label for="{{ form.enable_submission_notifications.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                {{ form.enable_submission_notifications.label }}
+              </label>
+              <p class="text-sm text-gray-500 mt-1">
+                When enabled, all staff members will receive an email notification whenever a student submits a quiz. The email includes student name, quiz title, submission time, and a direct link to view the submission.
+              </p>
+            </div>
+          </div>
+
+          <!-- Submit Button -->
+          <div class="flex items-center justify-between pt-4 border-t border-gray-200">
+            <a href="{% url 'dashboard' %}" class="text-sm font-medium text-gray-600 hover:text-gray-900">
+              Cancel
+            </a>
+            <button
+              type="submit"
+              class="inline-flex items-center gap-2 rounded-md bg-gray-900 px-6 py-2.5 text-sm font-semibold text-white hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2"
+            >
+              <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+              </svg>
+              Save Settings
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Help Text -->
+      <div class="border-t border-gray-200 bg-gray-50 px-6 py-4">
+        <div class="flex gap-3">
+          <svg class="h-5 w-5 text-gray-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <div class="text-sm text-gray-600">
+            <p class="font-medium mb-1">Important Notes:</p>
+            <ul class="list-disc list-inside space-y-1 ml-2">
+              <li>These settings are global and affect all staff members and administrators</li>
+              <li>Email notifications are sent only to users with valid email addresses</li>
+              <li>If email sending fails, the quiz upload or submission will still succeed</li>
+              <li>Make sure email credentials are properly configured in the system settings</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Status Card -->
+    <div class="mt-6 bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="flex h-10 w-10 items-center justify-center rounded-full bg-green-100">
+            <svg class="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <div>
+            <h3 class="text-sm font-medium text-gray-900">Email System Status</h3>
+            <p class="text-sm text-gray-500">Configured and ready to send notifications</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

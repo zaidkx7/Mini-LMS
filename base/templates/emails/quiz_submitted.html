@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Submitted</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f9fafb;
+        }
+        .container {
+            background-color: #ffffff;
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            background-color: #059669;
+            color: #ffffff;
+            padding: 20px;
+            border-radius: 8px 8px 0 0;
+            margin: -30px -30px 20px -30px;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: 600;
+        }
+        .content {
+            margin: 20px 0;
+        }
+        .info-box {
+            background-color: #f3f4f6;
+            border-left: 4px solid #10b981;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+        .info-row {
+            display: flex;
+            margin: 8px 0;
+        }
+        .info-label {
+            font-weight: 600;
+            color: #4b5563;
+            min-width: 140px;
+        }
+        .info-value {
+            color: #1f2937;
+        }
+        .button {
+            display: inline-block;
+            background-color: #059669;
+            color: #ffffff !important;
+            padding: 12px 24px;
+            text-decoration: none;
+            border-radius: 6px;
+            margin: 20px 0;
+            font-weight: 500;
+        }
+        .button:hover {
+            background-color: #047857;
+        }
+        .footer {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e5e7eb;
+            color: #6b7280;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>✅ Quiz Submitted</h1>
+        </div>
+
+        <div class="content">
+            <p>Hello,</p>
+            <p>A student has submitted a quiz. Here are the details:</p>
+
+            <div class="info-box">
+                <div class="info-row">
+                    <span class="info-label">Student Name:</span>
+                    <span class="info-value">{{ student.get_full_name|default:student.username }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Student ID:</span>
+                    <span class="info-value">{{ student.username }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Quiz Title:</span>
+                    <span class="info-value">{{ quiz.quiz_title }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Quiz Number:</span>
+                    <span class="info-value">{{ quiz.quiz_no }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Course:</span>
+                    <span class="info-value">{{ course.course_title }} ({{ course.course_no }})</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Submission Time:</span>
+                    <span class="info-value">{{ submitted_at|date:"F d, Y - g:i A" }}</span>
+                </div>
+            </div>
+
+            {% if submission_url %}
+            <p>
+                <a href="http://{{ submission_url }}" class="button">View Submission & Grade</a>
+            </p>
+            {% endif %}
+
+            <p>You can now review and grade this submission from the system.</p>
+        </div>
+
+        <div class="footer">
+            <p>This is an automated notification from Mini LMS. Please do not reply to this email.</p>
+            <p>© 2024 Mini LMS. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>

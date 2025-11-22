@@ -1,6 +1,6 @@
 from django import forms
 from django_ckeditor_5.widgets import CKEditor5Widget
-from .models import Quiz, Submission, StudentComplaints
+from .models import Quiz, Submission, StudentComplaints, EmailSettings
 
 
 class QuizAddingForm(forms.ModelForm):
@@ -56,4 +56,17 @@ class StudentComplaintsForm(forms.ModelForm):
         }
         labels = {
             "complaint": "Complaint"
+        }
+
+class EmailSettingsForm(forms.ModelForm):
+    class Meta:
+        model = EmailSettings
+        fields = ["enable_quiz_upload_notifications", "enable_submission_notifications"]
+        widgets = {
+            "enable_quiz_upload_notifications": forms.CheckboxInput(attrs={"class": "h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-600"}),
+            "enable_submission_notifications": forms.CheckboxInput(attrs={"class": "h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-600"}),
+        }
+        labels = {
+            "enable_quiz_upload_notifications": "Send email when a quiz is uploaded",
+            "enable_submission_notifications": "Send email when a quiz is submitted",
         }

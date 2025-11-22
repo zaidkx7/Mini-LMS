@@ -57,3 +57,37 @@ class StudentComplaints(models.Model):
 
     def __str__(self):
         return self.student.username
+
+class EmailSettings(models.Model):
+    """
+    Global email notification settings for the system.
+    This is a singleton model - only one instance should exist.
+    """
+    enable_quiz_upload_notifications = models.BooleanField(
+        default=True,
+        help_text="Send email notifications when a new quiz is uploaded"
+    )
+    enable_submission_notifications = models.BooleanField(
+        default=True,
+        help_text="Send email notifications when a student submits a quiz"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Email Notification Settings"
+        verbose_name_plural = "Email Notification Settings"
+
+    def __str__(self):
+        return "Email Notification Settings"
+
+    @classmethod
+    def get_settings(cls):
+        """Get or create the singleton settings instance"""
+        settings, created = cls.objects.get_or_create(pk=1)
+        return settings
+
+    def save(self, *args, **kwargs):
+        """Ensure only one instance exists (singleton pattern)"""
+        self.pk = 1
+        super().save(*args, **kwargs)
