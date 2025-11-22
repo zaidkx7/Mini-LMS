@@ -81,14 +81,56 @@ def register_student(request):
         password = request.POST.get('password')
         first_name = request.POST.get('first_name')
         last_name = request.POST.get('last_name')
+        email = request.POST.get('email')
         gender = request.POST.get('gender')
-        if not reg_no or not password or not first_name or not last_name or not gender:
-            messages.error(request, 'Please fill in all fields')
+        role = request.POST.get('role')
+
+        # Validate required fields
+        if not all([reg_no, password, first_name, last_name, gender, role]):
+            messages.error(request, 'Please fill in all required fields')
             return redirect('register_student')
-        user = User.objects.create_user(username=reg_no, password=password, first_name=first_name, last_name=last_name)
+
+        # Check if username already exists
+        if User.objects.filter(username=reg_no).exists():
+            messages.error(request, 'This registration number already exists')
+            return redirect('register_student')
+
+        # Create user with email
+        user = User.objects.create_user(
+            username=reg_no,
+            password=password,
+            first_name=first_name,
+            last_name=last_name,
+            email=email if email else ''
+        )
+
+        # Set user role based on selection
+        if role == 'student':
+            user.is_staff = False
+            user.is_superuser = False
+        elif role == 'staff':
+            user.is_staff = True
+            user.is_superuser = False
+        elif role == 'admin':
+            user.is_staff = True
+            user.is_superuser = True
+
+        user.save()
+
+        # Create student profile
         student_profile = StudentProfile.objects.create(user=user, gender=gender)
-        messages.success(request, 'Student registered successfully')
-        return redirect('dashboard')
+
+        # Send email notification (wrapped in try/except to prevent registration failure)
+        try:
+            notify_student_registered(user)
+        except Exception as e:
+            logger.error(f"Failed to send student registration notification: {str(e)}")
+
+        # Success message based on role
+        role_name = 'Administrator' if role == 'admin' else ('Staff' if role == 'staff' else 'Student')
+        messages.success(request, f'{role_name} registered successfully')
+        return redirect('registered_students')
+
     return render(request, 'base/register_student.html')
 
 @staff_member_required(login_url='dashboard')
@@ -476,31 +518,25 @@ def send_notification_email(subject, message_html, recipient_list):
         return False
 
 def notify_quiz_uploaded(quiz, uploaded_by):
-    """Send notification when a quiz is uploaded"""
+    """Send notification only to students when a quiz is uploaded"""
     email_settings = EmailSettings.get_settings()
 
     if not email_settings.enable_quiz_upload_notifications:
         return
 
-    # Get all staff/admin users
-    staff_users = User.objects.filter(Q(is_staff=True) | Q(is_superuser=True))
-    recipient_list = [user.email for user in staff_users if user.email]
-
+    # Get all students
+    students = User.objects.filter(is_staff=False, is_superuser=False)
+    recipient_list = [student.email for student in students if student.email]
     if not recipient_list:
         return
-
-    # Prepare email context
     context = {
-        'quiz': quiz,
-        'course': quiz.course,
-        'uploaded_by': uploaded_by,
-        'due_date': quiz.due_date,
-        'quiz_url': f"{settings.ALLOWED_HOSTS[0]}/quizzes/{quiz.course.id}/" if settings.ALLOWED_HOSTS else "",
-    }
-
-    # Render HTML email
+            'quiz': quiz,
+            'course': quiz.course,
+            'uploaded_by': uploaded_by.get_full_name() if uploaded_by.get_full_name() else uploaded_by.username,
+            'due_date': quiz.due_date,
+            'quiz_url': f"{settings.ALLOWED_HOSTS[0]}/quizzes/{quiz.course.id}/" if settings.ALLOWED_HOSTS else "",
+        }
     html_message = render_to_string('emails/quiz_uploaded.html', context)
-
     subject = f"New Quiz Uploaded: {quiz.quiz_title} ({quiz.course.course_title})"
     send_notification_email(subject, html_message, recipient_list)
 
@@ -533,3 +569,15 @@ def notify_quiz_submitted(submission):
 
     subject = f"Quiz Submitted: {submission.quiz.quiz_title} by {submission.student.get_full_name() or submission.student.username}"
     send_notification_email(subject, html_message, recipient_list)
+
+def notify_student_registered(user):
+    """Send notification when a student is registered"""
+    email_settings = EmailSettings.get_settings()
+    if not email_settings.enable_student_registration_notifications:
+        return
+    
+    if not user.email:
+        return
+    subject = f"Welcome to Mini LMS: {user.get_full_name() or user.username}"
+    html_message = render_to_string('emails/student_registered.html', {'user': user})
+    send_notification_email(subject, html_message, [user.email])

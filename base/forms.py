@@ -61,10 +61,11 @@ class StudentComplaintsForm(forms.ModelForm):
 class EmailSettingsForm(forms.ModelForm):
     class Meta:
         model = EmailSettings
-        fields = ["enable_quiz_upload_notifications", "enable_submission_notifications"]
+        fields = ["enable_quiz_upload_notifications", "enable_submission_notifications", "enable_student_registration_notifications"]
         widgets = {
             "enable_quiz_upload_notifications": forms.CheckboxInput(attrs={"class": "h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-600"}),
             "enable_submission_notifications": forms.CheckboxInput(attrs={"class": "h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-600"}),
+            "enable_student_registration_notifications": forms.CheckboxInput(attrs={"class": "h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-600"}),
         }
         labels = {
             "enable_quiz_upload_notifications": "Send email when a quiz is uploaded",

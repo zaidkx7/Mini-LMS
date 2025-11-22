@@ -71,6 +71,10 @@ class EmailSettings(models.Model):
         default=True,
         help_text="Send email notifications when a student submits a quiz"
     )
+    enable_student_registration_notifications = models.BooleanField(
+        default=True,
+        help_text="Send email notifications when a student is registered"
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
