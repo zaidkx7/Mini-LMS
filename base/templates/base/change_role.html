@@ -1,29 +1,133 @@
-{% extends 'base/main.html' %}
+{% extends 'base/base_with_sidebar.html' %}
 {% load static %}
-{% block title %}Change Role{% endblock %}
+
+{% block title %}Change User Role - Mini LMS{% endblock %}
+
 {% block content %}
-<div class="container">
-    <h1>Change Role</h1>
-    <form method="post">
-        {% csrf_token %}
-        <div class="form-group">
-            <label for="role">Role:</label>
-            <select class="form-control" id="role" name="role">
-                <option value="student">Student</option>
-                <option value="staff">Staff</option>
-                <option value="super_user">Super User</option>
-            </select>
+<div class="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+  <div class="mx-auto max-w-2xl">
+
+    <!-- Page Header -->
+    <div class="mb-8">
+      <div class="flex items-center gap-3">
+        <a href="{% url 'registered_students' %}" class="inline-flex items-center justify-center h-10 w-10 rounded-md border border-gray-300 bg-white text-gray-600 hover:bg-gray-50 hover:text-gray-900">
+          <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+          </svg>
+        </a>
+        <div>
+          <h1 class="text-2xl font-semibold text-gray-900">Change User Role</h1>
+          <p class="mt-1 text-sm text-gray-600">Update user access level and permissions</p>
         </div>
-        <button type="submit" class="sub-label" style="padding: 0px; text-align: center; width: 120px; margin-left: 15px; margin-top: 5px;"><i class="fa-solid fa-user-shield"></i> Change Role</button>
-    </form>
-</div>
-{% if messages %}
-    <div id="popup-message-container">
-        {% for message in messages %}
-            <div class="popup-message {{ message.tags }}">
-                {{ message }}
-            </div>
-        {% endfor %}
+      </div>
     </div>
-{% endif %}
+
+    <!-- User Info Card -->
+    {% if student %}
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
+      <div class="border-b border-gray-200 px-6 py-4">
+        <h2 class="text-lg font-semibold text-gray-900">User Information</h2>
+      </div>
+
+      <div class="px-6 py-6">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <p class="text-sm font-medium text-gray-600 mb-1">Name</p>
+            <p class="text-base font-semibold text-gray-900">{{ student.first_name }} {{ student.last_name }}</p>
+          </div>
+
+          <div>
+            <p class="text-sm font-medium text-gray-600 mb-1">Registration Number</p>
+            <p class="text-base font-mono font-semibold text-gray-900">{{ student.username }}</p>
+          </div>
+
+          <div>
+            <p class="text-sm font-medium text-gray-600 mb-1">Current Role</p>
+            <p class="text-base font-semibold text-gray-900">
+              {% if student.is_superuser %}
+                <span class="inline-flex items-center rounded-full bg-amber-100 px-3 py-1 text-sm font-medium text-amber-800">
+                  Administrator
+                </span>
+              {% elif student.is_staff %}
+                <span class="inline-flex items-center rounded-full bg-purple-100 px-3 py-1 text-sm font-medium text-purple-800">
+                  Staff/Instructor
+                </span>
+              {% else %}
+                <span class="inline-flex items-center rounded-full bg-blue-100 px-3 py-1 text-sm font-medium text-blue-800">
+                  Student
+                </span>
+              {% endif %}
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Role Change Form Card -->
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+      <div class="border-b border-gray-200 px-6 py-4">
+        <h2 class="text-lg font-semibold text-gray-900">Change Role</h2>
+      </div>
+
+      <div class="p-6">
+        <form method="POST" class="space-y-6">
+          {% csrf_token %}
+
+          <!-- Role Selection -->
+          <div>
+            <label for="role" class="block text-sm font-medium text-gray-700 mb-2">
+              New Role <span class="text-red-600">*</span>
+            </label>
+            <select
+              id="role"
+              name="role"
+              required
+              class="block w-full rounded-md border border-gray-300 py-2.5 px-3 text-gray-900 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/20 sm:text-sm"
+            >
+              <option value="">Select a role</option>
+              <option value="student">Student</option>
+              <option value="staff">Staff/Instructor</option>
+              <option value="super_user">Administrator</option>
+            </select>
+            <p class="mt-2 text-xs text-gray-500">Select the appropriate role for this user</p>
+          </div>
+
+          <!-- Submit Button -->
+          <div class="flex items-center justify-between pt-4 border-t border-gray-200">
+            <a href="{% url 'registered_students' %}" class="text-sm font-medium text-gray-600 hover:text-gray-900">
+              Cancel
+            </a>
+            <button
+              type="submit"
+              class="inline-flex items-center gap-2 rounded-md bg-gray-900 px-6 py-2.5 text-sm font-semibold text-white hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2"
+            >
+              <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+              </svg>
+              Update Role
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Role Descriptions -->
+      <div class="border-t border-gray-200 bg-gray-50 px-6 py-4">
+        <div class="flex gap-3">
+          <svg class="h-5 w-5 text-gray-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <div class="text-sm text-gray-600">
+            <p class="font-medium mb-1">Role Descriptions:</p>
+            <ul class="list-disc list-inside space-y-1 ml-2">
+              <li><strong>Student:</strong> Can view courses, submit quizzes, and view their own grades</li>
+              <li><strong>Staff/Instructor:</strong> Can manage courses, quizzes, grade submissions, and view all student data</li>
+              <li><strong>Administrator:</strong> Full system access including user management and role changes</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 {% endblock %}

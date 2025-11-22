@@ -1,0 +1,378 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Mini LMS{% endblock %}</title>
+
+  <!-- Favicon -->
+  <link rel="icon" href="{% static 'images/lock.png' %}">
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#111827',
+            secondary: '#4b5563',
+            accent: '#2563eb',
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+        }
+      }
+    }
+  </script>
+
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <!-- CKEditor (for rich text editing) -->
+  {% block extra_head %}{% endblock %}
+
+  <!-- Custom notification styles -->
+  <style>
+    #popup-message-container {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      max-width: 400px;
+    }
+
+    .popup-message {
+      padding: 16px 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      font-size: 14px;
+      font-weight: 500;
+      color: white;
+      display: none;
+    }
+
+    .popup-message.success {
+      background-color: #059669;
+    }
+
+    .popup-message.error {
+      background-color: #dc2626;
+    }
+
+    .popup-message.info {
+      background-color: #2563eb;
+    }
+
+    .popup-message.warning {
+      background-color: #d97706;
+    }
+  </style>
+</head>
+
+<body class="h-full bg-gray-50 text-gray-900 antialiased">
+
+  <!-- Popup Messages Container -->
+  <div id="popup-message-container"></div>
+
+  <!-- Layout with Sidebar -->
+  <div class="flex h-full">
+
+    <!-- Sidebar Navigation -->
+    <div class="hidden lg:flex lg:flex-shrink-0">
+      <div class="flex w-64 flex-col">
+        <div class="flex min-h-0 flex-1 flex-col bg-gray-900">
+
+          <!-- Logo -->
+          <div class="flex h-16 flex-shrink-0 items-center px-4 border-b border-gray-800">
+            <img src="{% static 'images/lms_logo.png' %}" alt="LMS Logo" class="h-8 w-auto brightness-0 invert">
+            <span class="ml-3 text-lg font-semibold text-white">Mini LMS</span>
+          </div>
+
+          <!-- Navigation Links -->
+          <div class="flex flex-1 flex-col overflow-y-auto">
+            <nav class="flex-1 space-y-1 px-2 py-4">
+
+              <!-- Dashboard -->
+              <a href="{% url 'dashboard' %}" class="group flex items-center px-3 py-2 text-sm font-medium text-gray-300 rounded-md hover:bg-gray-800 hover:text-white">
+                <svg class="mr-3 h-5 w-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                </svg>
+                Dashboard
+              </a>
+
+              <!-- Courses -->
+              <a href="{% url 'courses' %}" class="group flex items-center px-3 py-2 text-sm font-medium text-gray-300 rounded-md hover:bg-gray-800 hover:text-white">
+                <svg class="mr-3 h-5 w-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                </svg>
+                Courses
+              </a>
+
+              <!-- Rankings -->
+              <a href="{% url 'view_overall_rank' %}" class="group flex items-center px-3 py-2 text-sm font-medium text-gray-300 rounded-md hover:bg-gray-800 hover:text-white">
+                <svg class="mr-3 h-5 w-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+                Rankings
+              </a>
+
+              <!-- Complaints (conditional) -->
+              {% if request.user.is_staff or request.user.is_superuser %}
+              <a href="{% url 'view_complaints' %}" class="group flex items-center px-3 py-2 text-sm font-medium text-gray-300 rounded-md hover:bg-gray-800 hover:text-white">
+                <svg class="mr-3 h-5 w-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+                Complaints
+              </a>
+              {% else %}
+              <a href="{% url 'submit_complaint' %}" class="group flex items-center px-3 py-2 text-sm font-medium text-gray-300 rounded-md hover:bg-gray-800 hover:text-white">
+                <svg class="mr-3 h-5 w-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+                Complaints
+              </a>
+              {% endif %}
+
+              <!-- Staff-only Section -->
+              {% if request.user.is_staff %}
+              <div class="pt-4 mt-4 border-t border-gray-800">
+                <p class="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Staff Actions</p>
+              </div>
+
+              <a href="{% url 'registered_students' %}" class="group flex items-center px-3 py-2 text-sm font-medium text-gray-300 rounded-md hover:bg-gray-800 hover:text-white">
+                <svg class="mr-3 h-5 w-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
+                Students
+              </a>
+
+              <a href="{% url 'add_course' %}" class="group flex items-center px-3 py-2 text-sm font-medium text-gray-300 rounded-md hover:bg-gray-800 hover:text-white">
+                <svg class="mr-3 h-5 w-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                </svg>
+                Add Course
+              </a>
+
+              <a href="{% url 'add_quiz' %}" class="group flex items-center px-3 py-2 text-sm font-medium text-gray-300 rounded-md hover:bg-gray-800 hover:text-white">
+                <svg class="mr-3 h-5 w-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                </svg>
+                Add Quiz
+              </a>
+              {% endif %}
+
+            </nav>
+          </div>
+
+          <!-- User Menu at Bottom -->
+          <div class="flex flex-shrink-0 border-t border-gray-800 p-4">
+            <div class="group block w-full flex-shrink-0">
+              <div class="flex items-center">
+                <div>
+                  {% if user.studentprofile.gender == 'Female' %}
+                  <img src="{% static 'images/fmale.png' %}" alt="Profile" class="inline-block h-9 w-9 rounded-full">
+                  {% else %}
+                  <img src="{% static 'images/male.png' %}" alt="Profile" class="inline-block h-9 w-9 rounded-full">
+                  {% endif %}
+                </div>
+                <div class="ml-3 flex-1">
+                  <p class="text-sm font-medium text-white">{{ user.first_name }} {{ user.last_name }}</p>
+                  <p class="text-xs font-medium text-gray-400">{{ user.username }}</p>
+                </div>
+                <div class="ml-auto">
+                  <button type="button" onclick="toggleUserMenu()" class="text-gray-400 hover:text-white">
+                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+              <!-- User Dropdown Menu -->
+              <div id="user-menu" class="hidden mt-2 space-y-1">
+                <a href="{% url 'change_password' %}" class="group flex items-center px-3 py-2 text-sm font-medium text-gray-300 rounded-md hover:bg-gray-800 hover:text-white">
+                  <svg class="mr-3 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+                  </svg>
+                  Password
+                </a>
+                <a href="{% url 'logout' %}" class="group flex items-center px-3 py-2 text-sm font-medium text-gray-300 rounded-md hover:bg-gray-800 hover:text-white">
+                  <svg class="mr-3 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                  </svg>
+                  Logout
+                </a>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- Mobile menu button -->
+    <div class="lg:hidden fixed top-0 left-0 right-0 z-50 bg-gray-900 border-b border-gray-800">
+      <div class="flex h-16 items-center justify-between px-4">
+        <div class="flex items-center">
+          <img src="{% static 'images/lms_logo.png' %}" alt="LMS Logo" class="h-8 w-auto brightness-0 invert">
+          <span class="ml-3 text-lg font-semibold text-white">Mini LMS</span>
+        </div>
+        <button type="button" id="mobile-sidebar-toggle" class="text-gray-400 hover:text-white">
+          <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Mobile Sidebar -->
+    <div id="mobile-sidebar" class="hidden lg:hidden fixed inset-0 z-40 bg-gray-900">
+      <div class="flex flex-col h-full">
+        <div class="flex h-16 items-center justify-between px-4 border-b border-gray-800">
+          <div class="flex items-center">
+            <img src="{% static 'images/lms_logo.png' %}" alt="LMS Logo" class="h-8 w-auto brightness-0 invert">
+            <span class="ml-3 text-lg font-semibold text-white">Mini LMS</span>
+          </div>
+          <button type="button" onclick="toggleMobileSidebar()" class="text-gray-400 hover:text-white">
+            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        <nav class="flex-1 space-y-1 px-2 py-4 overflow-y-auto">
+          <a href="{% url 'dashboard' %}" class="group flex items-center px-3 py-2 text-sm font-medium text-gray-300 rounded-md hover:bg-gray-800 hover:text-white">
+            <svg class="mr-3 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+            </svg>
+            Dashboard
+          </a>
+          <a href="{% url 'courses' %}" class="group flex items-center px-3 py-2 text-sm font-medium text-gray-300 rounded-md hover:bg-gray-800 hover:text-white">
+            <svg class="mr-3 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+            </svg>
+            Courses
+          </a>
+          <a href="{% url 'view_overall_rank' %}" class="group flex items-center px-3 py-2 text-sm font-medium text-gray-300 rounded-md hover:bg-gray-800 hover:text-white">
+            <svg class="mr-3 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+            </svg>
+            Rankings
+          </a>
+          {% if request.user.is_staff or request.user.is_superuser %}
+          <a href="{% url 'view_complaints' %}" class="group flex items-center px-3 py-2 text-sm font-medium text-gray-300 rounded-md hover:bg-gray-800 hover:text-white">
+            <svg class="mr-3 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+            Complaints
+          </a>
+          {% else %}
+          <a href="{% url 'submit_complaint' %}" class="group flex items-center px-3 py-2 text-sm font-medium text-gray-300 rounded-md hover:bg-gray-800 hover:text-white">
+            <svg class="mr-3 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+            Complaints
+          </a>
+          {% endif %}
+          {% if request.user.is_staff %}
+          <div class="pt-4 mt-4 border-t border-gray-800">
+            <p class="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Staff Actions</p>
+          </div>
+          <a href="{% url 'registered_students' %}" class="group flex items-center px-3 py-2 text-sm font-medium text-gray-300 rounded-md hover:bg-gray-800 hover:text-white">
+            <svg class="mr-3 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+            </svg>
+            Students
+          </a>
+          <a href="{% url 'add_course' %}" class="group flex items-center px-3 py-2 text-sm font-medium text-gray-300 rounded-md hover:bg-gray-800 hover:text-white">
+            <svg class="mr-3 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+            </svg>
+            Add Course
+          </a>
+          <a href="{% url 'add_quiz' %}" class="group flex items-center px-3 py-2 text-sm font-medium text-gray-300 rounded-md hover:bg-gray-800 hover:text-white">
+            <svg class="mr-3 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+            </svg>
+            Add Quiz
+          </a>
+          {% endif %}
+          <a href="{% url 'change_password' %}" class="group flex items-center px-3 py-2 text-sm font-medium text-gray-300 rounded-md hover:bg-gray-800 hover:text-white">
+            <svg class="mr-3 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+            </svg>
+            Change Password
+          </a>
+          <a href="{% url 'logout' %}" class="group flex items-center px-3 py-2 text-sm font-medium text-gray-300 rounded-md hover:bg-gray-800 hover:text-white">
+            <svg class="mr-3 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+            </svg>
+            Logout
+          </a>
+        </nav>
+      </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="flex flex-1 flex-col overflow-hidden">
+      <main class="flex-1 overflow-y-auto lg:pt-0 pt-16">
+        {% block content %}{% endblock %}
+      </main>
+
+      <footer class="bg-white border-t border-gray-200 py-4">
+        <div class="px-4 sm:px-6 lg:px-8">
+          <p class="text-center text-xs text-gray-600">
+            &copy; 2024 Muhammad Zaid. All rights reserved.
+          </p>
+        </div>
+      </footer>
+    </div>
+
+  </div>
+
+  <!-- Scripts -->
+  <script>
+    function toggleUserMenu() {
+      document.getElementById('user-menu').classList.toggle('hidden');
+    }
+
+    function toggleMobileSidebar() {
+      document.getElementById('mobile-sidebar').classList.toggle('hidden');
+    }
+
+    const mobileSidebarToggle = document.getElementById('mobile-sidebar-toggle');
+    if (mobileSidebarToggle) {
+      mobileSidebarToggle.addEventListener('click', toggleMobileSidebar);
+    }
+
+    {% if messages %}
+    document.addEventListener('DOMContentLoaded', function() {
+      const container = document.getElementById('popup-message-container');
+      {% for message in messages %}
+      const messageDiv = document.createElement('div');
+      messageDiv.className = 'popup-message {{ message.tags }}';
+      messageDiv.textContent = '{{ message }}';
+      messageDiv.style.display = 'block';
+      container.appendChild(messageDiv);
+
+      setTimeout(() => {
+        messageDiv.style.display = 'none';
+        messageDiv.remove();
+      }, 3000);
+      {% endfor %}
+    });
+    {% endif %}
+  </script>
+</body>
+
+</html>

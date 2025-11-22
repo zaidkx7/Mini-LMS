@@ -1,48 +1,81 @@
-{% extends 'base/main.html' %}
+{% extends 'base/base_with_sidebar.html' %}
 {% load static %}
 {% load custom_tags %}
-{% block title %} Rank {% endblock %}
-{% block content %}
 
-<div class="quiz-main-container" style="height: 88vh;">
-    <div id="quiz-container" class="quiz-main-container-box">
-        <h3 class="quiz-title-2"><strong>Courses</strong></h3>
-        <div class="table-responsive">
-            <table id="course-table" style="vertical-align: middle; min-width: 100%;"
-                class="table table-hover table-bordered">
-            <thead>
-                <tr>
-                    <th width="4%"><strong>Course ID</strong></th>
-                    <th width="12%"><strong>Course Title</strong></th>
-                    <th width="2%" style="text-align: center;"><strong>Action</strong></th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for course in courses %}
-                <tr>
-                    <td class="m">{{course.course_no}}</td>
-                    <td class="m">{{course.course_title}}</td>
-                    <td class="m" style="display: flex; justify-content: center; align-items: center; gap: 10px;">
-                        <a href="{% url 'view_rank' course.id %}">
-                            <button class="sub-label" style="padding: 0px; width: 100px; margin-top: 5px;">
-                                <i class="fa fa-ranking-star"></i> View Rank
-                            </button>
-                        </a>
-                    </td>
-                </tr>
-                {% endfor %}
-                </tbody>
-            </table>
-        </div>
+{% block title %}Course Rankings - Mini LMS{% endblock %}
+
+{% block content %}
+<div class="px-4 py-8 sm:px-6 lg:px-8">
+
+  <!-- Page Header -->
+  <div class="mb-8">
+    <div class="sm:flex sm:items-center sm:justify-between">
+      <div>
+        <h1 class="text-2xl font-semibold text-gray-900">Course Rankings</h1>
+        <p class="mt-2 text-sm text-gray-600">View student rankings for each course</p>
+      </div>
+      <div class="mt-4 sm:mt-0">
+        <span class="inline-flex items-center rounded-full bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700">
+          {{ courses|length }} Course{{ courses|length|pluralize }}
+        </span>
+      </div>
     </div>
+  </div>
+
+  <!-- Courses Table -->
+  <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+    <div class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+          <tr>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Course Number
+            </th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Course Title
+            </th>
+            <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Actions
+            </th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+          {% for course in courses %}
+          <tr class="hover:bg-gray-50">
+            <!-- Course Number -->
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="text-sm font-mono font-medium text-gray-900">{{ course.course_no }}</div>
+            </td>
+
+            <!-- Course Title -->
+            <td class="px-6 py-4">
+              <div class="text-sm font-medium text-gray-900">{{ course.course_title }}</div>
+            </td>
+
+            <!-- Actions -->
+            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+              <a href="{% url 'view_rank' course.id %}" class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-white bg-gray-900 rounded-md hover:bg-gray-800">
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+                View Rankings
+              </a>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="3" class="px-6 py-12 text-center">
+              <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+              </svg>
+              <h3 class="mt-2 text-sm font-medium text-gray-900">No courses available</h3>
+              <p class="mt-1 text-sm text-gray-500">There are no courses to display rankings for.</p>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
 </div>
-{% if messages %}
-    <div id="popup-message-container">
-        {% for message in messages %}
-            <div class="popup-message {{ message.tags }}">
-                {{ message }}
-            </div>
-        {% endfor %}
-    </div>
-{% endif %}
 {% endblock %}

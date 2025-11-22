@@ -1,35 +1,149 @@
-{% extends 'base/main.html' %}
+{% extends 'base/base_with_sidebar.html' %}
 {% load static %}
-{% block title %}Grade Submission{% endblock %}
+
+{% block title %}Grade Submission - Mini LMS{% endblock %}
+
 {% block content %}
-<div class="container">
-    <div class="row">
-        <div class="col-md-6 offset-md-3">
-            <div class="card">
-                <div class="card-header">
-                    <h4 style="text-align: center;"><strong>Grade Submission</strong></h4>
-                </div>
-                <div class="card-body">
-                    <form method="POST">
-                        {% csrf_token %}
-                        <div class="form-group">
-                            <label for="marks">Marks</label>
-                            <input type="number" class="form-control" id="marks" name="marks" max="10" min="0" required>
-                        </div>
-                        <button type="submit" class="cstm-btn" style="width: 100%; border-radius: 5px;">Grade</button>
-                    </form>
-                </div>
-            </div>
+<div class="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+  <div class="mx-auto max-w-2xl">
+
+    <!-- Page Header -->
+    <div class="mb-8">
+      <div class="flex items-center gap-3">
+        <a href="javascript:history.back()" class="inline-flex items-center justify-center h-10 w-10 rounded-md border border-gray-300 bg-white text-gray-600 hover:bg-gray-50 hover:text-gray-900">
+          <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+          </svg>
+        </a>
+        <div>
+          <h1 class="text-2xl font-semibold text-gray-900">Grade Submission</h1>
+          <p class="mt-1 text-sm text-gray-600">Assign marks to student's quiz submission</p>
         </div>
+      </div>
     </div>
-</div>
-{% if messages %}
-    <div id="popup-message-container">
-        {% for message in messages %}
-            <div class="popup-message {{ message.tags }}">
-                {{ message }}
+
+    <!-- Submission Info Card -->
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
+      <div class="border-b border-gray-200 px-6 py-4">
+        <h2 class="text-lg font-semibold text-gray-900">Submission Details</h2>
+      </div>
+
+      <div class="px-6 py-6">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <p class="text-sm font-medium text-gray-600 mb-1">Student</p>
+            <p class="text-base font-semibold text-gray-900">{{ submission.student.first_name }} {{ submission.student.last_name }}</p>
+            <p class="text-sm text-gray-500 font-mono">{{ submission.student.username }}</p>
+          </div>
+
+          <div>
+            <p class="text-sm font-medium text-gray-600 mb-1">Quiz</p>
+            <p class="text-base font-semibold text-gray-900">{{ submission.quiz.quiz_title }}</p>
+            <p class="text-sm text-gray-500 font-mono">{{ submission.quiz.quiz_no }}</p>
+          </div>
+
+          <div>
+            <p class="text-sm font-medium text-gray-600 mb-1">Course</p>
+            <p class="text-base font-semibold text-gray-900">{{ submission.course.course_title }}</p>
+            <p class="text-sm text-gray-500 font-mono">{{ submission.course.course_no }}</p>
+          </div>
+
+          <div>
+            <p class="text-sm font-medium text-gray-600 mb-1">Submitted At</p>
+            <p class="text-base font-semibold text-gray-900">{{ submission.submitted_at|date:"M d, Y" }}</p>
+            <p class="text-sm text-gray-500">{{ submission.submitted_at|date:"g:i A" }}</p>
+          </div>
+        </div>
+
+        {% if submission.file %}
+        <div class="mt-6 pt-6 border-t border-gray-200">
+          <a href="{{ submission.file.url }}" download class="inline-flex items-center gap-2 text-sm font-medium text-blue-600 hover:text-blue-700">
+            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+            </svg>
+            Download Submitted File
+          </a>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Grading Card -->
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+      <div class="border-b border-gray-200 px-6 py-4">
+        <h2 class="text-lg font-semibold text-gray-900">Assign Grade</h2>
+      </div>
+
+      <div class="p-6">
+        <form method="POST" class="space-y-6">
+          {% csrf_token %}
+
+          <!-- Marks Input -->
+          <div>
+            <label for="marks" class="block text-sm font-medium text-gray-700 mb-2">
+              Marks <span class="text-red-600">*</span>
+            </label>
+            <div class="relative">
+              <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                </svg>
+              </div>
+              <input
+                type="number"
+                id="marks"
+                name="marks"
+                min="0"
+                max="10"
+                step="0.5"
+                {% if submission.marks is not None %}value="{{ submission.marks }}"{% endif %}
+                required
+                class="block w-full rounded-md border border-gray-300 py-2.5 pl-10 pr-12 text-gray-900 placeholder-gray-400 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/20 sm:text-sm"
+                placeholder="Enter marks (0-10)"
+              >
+              <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+                <span class="text-gray-500 sm:text-sm">/ 10</span>
+              </div>
             </div>
-        {% endfor %}
+            <p class="mt-2 text-xs text-gray-500">Enter a score between 0 and 10 (decimals allowed)</p>
+          </div>
+
+          <!-- Submit Button -->
+          <div class="flex items-center justify-between pt-4 border-t border-gray-200">
+            <a href="javascript:history.back()" class="text-sm font-medium text-gray-600 hover:text-gray-900">
+              Cancel
+            </a>
+            <button
+              type="submit"
+              class="inline-flex items-center gap-2 rounded-md bg-blue-600 px-6 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
+            >
+              <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+              </svg>
+              {% if submission.marks is not None %}Update Grade{% else %}Submit Grade{% endif %}
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Grading Tips -->
+      <div class="border-t border-gray-200 bg-gray-50 px-6 py-4">
+        <div class="flex gap-3">
+          <svg class="h-5 w-5 text-gray-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <div class="text-sm text-gray-600">
+            <p class="font-medium mb-1">Grading Guidelines:</p>
+            <ul class="list-disc list-inside space-y-1 ml-2">
+              <li>Review the submitted file before assigning marks</li>
+              <li>Ensure grading is fair and consistent across all students</li>
+              <li>Consider adding detailed feedback in the remarks section</li>
+              <li>You can update grades later if needed</li>
+            </ul>
+          </div>
+        </div>
+      </div>
     </div>
-{% endif %}
+  </div>
+</div>
 {% endblock %}

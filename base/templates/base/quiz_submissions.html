@@ -1,81 +1,183 @@
-{% extends 'base/main.html' %}
+{% extends 'base/base_with_sidebar.html' %}
 {% load static %}
-{% block title %}Quiz Submissions{% endblock %}
+
+{% block title %}Quiz Submissions - {{ quiz.quiz_title }} - Mini LMS{% endblock %}
+
 {% block content %}
-<div class="container">
-    <h1>{{ quiz.quiz_title }} Quiz Submissions</h1>
-    <div class="table-responsive">
-    <table class="table table-striped">
-        <thead style="border-top: 3px solid black;">
-            <tr>
-                <th>Student</th>
-                <th>Student Name</th>
-                <th>Submitted At</th>
-                <th>Marks</th>
-                <th style="text-align: center;">Action</th>
-            </tr>
+<div class="px-4 py-8 sm:px-6 lg:px-8">
+
+  <!-- Page Header -->
+  <div class="mb-8">
+    <div class="flex items-center gap-3 mb-4">
+      <a href="{% url 'quizzes' quiz.course.id %}" class="inline-flex items-center justify-center h-10 w-10 rounded-md border border-gray-300 bg-white text-gray-600 hover:bg-gray-50 hover:text-gray-900">
+        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+        </svg>
+      </a>
+      <div>
+        <h1 class="text-2xl font-semibold text-gray-900">Quiz Submissions</h1>
+        <p class="mt-1 text-sm text-gray-600">{{ quiz.quiz_title }} - {{ quiz.quiz_no }}</p>
+      </div>
+    </div>
+
+    <!-- Quiz Info Card -->
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+      <div class="flex items-center gap-3">
+        <div class="flex h-12 w-12 items-center justify-center rounded-md bg-gray-100">
+          <svg class="h-6 w-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+        </div>
+        <div>
+          <h2 class="text-lg font-semibold text-gray-900">{{ users|length }} Student{{ users|length|pluralize }}</h2>
+          <p class="text-sm text-gray-600">
+            {% with submitted=users|length %}
+              {% with total=users|length %}
+                {{ submitted }} submission{{ submitted|pluralize }} received
+              {% endwith %}
+            {% endwith %}
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Submissions Table -->
+  <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+    <div class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+          <tr>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Student
+            </th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Submitted At
+            </th>
+            <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Marks
+            </th>
+            <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Actions
+            </th>
+          </tr>
         </thead>
-        <tbody>
-            {% for user in users %}
-            <tr>
-                <td>{{ user.username }}</td>
-                <td>{{ user.first_name }} {{ user.last_name }}</td>
-                {% if user.submission %}
-                    <td>{{ user.submission.submitted_at | date:"F d, Y h:i A" }}</td>
-                    <td>{{ user.submission.marks }}</td>
+        <tbody class="bg-white divide-y divide-gray-200">
+          {% for user in users %}
+          <tr class="hover:bg-gray-50">
+            <!-- Student Info -->
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="flex items-center">
+                <div class="flex-shrink-0 h-10 w-10 flex items-center justify-center rounded-full bg-gray-100">
+                  <span class="text-sm font-medium text-gray-700">{{ user.first_name|first }}{{ user.last_name|first }}</span>
+                </div>
+                <div class="ml-4">
+                  <div class="text-sm font-medium text-gray-900">{{ user.first_name }} {{ user.last_name }}</div>
+                  <div class="text-sm text-gray-500 font-mono">{{ user.username }}</div>
+                </div>
+              </div>
+            </td>
+
+            <!-- Submitted At -->
+            <td class="px-6 py-4 whitespace-nowrap">
+              {% if user.submission %}
+                <div class="text-sm text-gray-900">{{ user.submission.submitted_at|date:"M d, Y" }}</div>
+                <div class="text-sm text-gray-500">{{ user.submission.submitted_at|date:"g:i A" }}</div>
+              {% else %}
+                <span class="inline-flex items-center rounded-full bg-amber-100 px-3 py-1 text-xs font-medium text-amber-800">
+                  Not Submitted
+                </span>
+              {% endif %}
+            </td>
+
+            <!-- Marks -->
+            <td class="px-6 py-4 whitespace-nowrap text-center">
+              {% if user.submission %}
+                {% if user.submission.marks is not None %}
+                  <span class="inline-flex items-center rounded-full bg-green-100 px-3 py-1 text-sm font-medium text-green-800">
+                    {{ user.submission.marks }}/10
+                  </span>
                 {% else %}
-                    <td>Not Submitted</td>
-                    <td>0</td>
+                  <span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-600">
+                    Not Graded
+                  </span>
                 {% endif %}
-                <td class="m" style="display: flex; justify-content: center; align-items: center; gap: 10px;">
-                    {% if user.submission and user.submission.file %}
-                    <a href="{{ user.submission.file.url }}" download>
-                        <button class="sub-label" style="padding: 0px; width: 100px; margin-top: 5px;">
-                            <i class="fa-solid fa-download"></i> Download
-                        </button>
+              {% else %}
+                <span class="text-sm text-gray-400">-</span>
+              {% endif %}
+            </td>
+
+            <!-- Actions -->
+            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+              <div class="flex items-center justify-end gap-2">
+                {% if user.submission and user.submission.file %}
+                  <!-- Download -->
+                  <a href="{{ user.submission.file.url }}" download class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                    </svg>
+                    Download
+                  </a>
+
+                  {% if request.user.is_staff %}
+                    <!-- Grade -->
+                    <a href="{% url 'grade_submission' user.submission.id %}" class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700">
+                      <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                      </svg>
+                      Grade
                     </a>
-                        {% if request.user.is_staff %}
-                        <a href="{% url 'grade_submission' user.submission.id %}">
-                            <button class="sub-label" style="padding: 0px; width: 100px; margin-top: 5px;">
-                                <i class="fa-solid fa-pen-to-square"></i> Grade
-                            </button>
-                        </a>
-                        <a href="{% url 'remarks' user.submission.id %}">
-                            <button class="sub-label" style="padding: 0px; width: 100px; margin-top: 5px;">
-                                <i class="fa-solid fa-pen-to-square"></i> Remarks
-                            </button>
-                        </a>
-                        <a href="{% url 'view_remarks' user.submission.id %}">
-                            <button class="sub-label" style="padding: 0px; width: 100px; margin-top: 5px;">
-                                <i class="fa-solid fa-eye"></i> Remarks
-                            </button>
-                        </a>
-                        {% else %}
-                            {% if user.submission.remarks and user == request.user %}
-                            <a href="{% url 'view_remarks' user.submission.id %}">
-                                <button class="sub-label" style="padding: 0px; width: 100px; margin-top: 5px;">
-                                    <i class="fa-solid fa-eye"></i> Remarks
-                                </button>
-                            </a>
-                            {% endif %}
-                        {% endif %}
-                    {% else %}
-                        <p>No file submitted</p>
+
+                    <!-- Add/Edit Remarks -->
+                    <a href="{% url 'remarks' user.submission.id %}" class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200">
+                      <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
+                      </svg>
+                      Feedback
+                    </a>
+
+                    <!-- View Remarks -->
+                    {% if user.submission.remarks %}
+                      <a href="{% url 'view_remarks' user.submission.id %}" class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200">
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        </svg>
+                        View
+                      </a>
                     {% endif %}
-                </td>
-            </tr>
-            {% endfor %}
+                  {% else %}
+                    <!-- Student can view remarks if they exist -->
+                    {% if user.submission.remarks and user == request.user %}
+                      <a href="{% url 'view_remarks' user.submission.id %}" class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200">
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        </svg>
+                        View Feedback
+                      </a>
+                    {% endif %}
+                  {% endif %}
+                {% else %}
+                  <span class="text-sm text-gray-400">No submission</span>
+                {% endif %}
+              </div>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="4" class="px-6 py-12 text-center">
+              <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+              </svg>
+              <h3 class="mt-2 text-sm font-medium text-gray-900">No students found</h3>
+              <p class="mt-1 text-sm text-gray-500">No students are enrolled in this course yet.</p>
+            </td>
+          </tr>
+          {% endfor %}
         </tbody>
-    </table>
+      </table>
     </div>
+  </div>
 </div>
-{% if messages %}
-    <div id="popup-message-container">
-        {% for message in messages %}
-            <div class="popup-message {{ message.tags }}">
-                {{ message }}
-            </div>
-        {% endfor %}
-    </div>
-{% endif %}
 {% endblock %}

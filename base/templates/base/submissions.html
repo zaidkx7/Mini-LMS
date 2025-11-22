@@ -1,43 +1,141 @@
-{% extends 'base/main.html' %}
+{% extends 'base/base_with_sidebar.html' %}
 {% load static %}
-{% block title %}Submissions{% endblock %}
+
+{% block title %}All Submissions - Mini LMS{% endblock %}
+
 {% block content %}
-<div class="container">
-    <h1>Submissions</h1>
-    <div class="table-responsive">
-    <table class="table table-striped">
-        <thead style="border-top: 3px solid black;">
-            <tr>
-                <th>Student</th>
-                <th>Quiz No</th>
-                <th>Quiz</th>
-                <th>Course</th>
-                <th>Submitted At</th>
-                <th>Action</th>
-            </tr>
+<div class="px-4 py-8 sm:px-6 lg:px-8">
+
+  <!-- Page Header -->
+  <div class="mb-8">
+    <div class="sm:flex sm:items-center sm:justify-between">
+      <div>
+        <h1 class="text-2xl font-semibold text-gray-900">All Submissions</h1>
+        <p class="mt-2 text-sm text-gray-600">View all quiz submissions across all courses</p>
+      </div>
+      <div class="mt-4 sm:mt-0">
+        <span class="inline-flex items-center rounded-full bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700">
+          {{ submissions|length }} Total Submission{{ submissions|length|pluralize }}
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Submissions Table -->
+  <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+    <div class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+          <tr>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Student
+            </th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Quiz
+            </th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Course
+            </th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Submitted At
+            </th>
+            <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Marks
+            </th>
+            <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Actions
+            </th>
+          </tr>
         </thead>
-        <tbody>
-            {% for submission in submissions %}
-            <tr>
-                <td>{{ submission.student.username }}</td>
-                <td>{{ submission.quiz.quiz_no }}</td>
-                <td>{{ submission.quiz.quiz_title }}</td>
-                <td>{{ submission.course.course_no }}</td>
-                <td>{{ submission.submitted_at | date:"F d, Y h:i A" }}</td>
-                <td><a href="{{ submission.file.url }}" class="btn btn-dark" download>Download</a></td>
-            </tr>
-            {% endfor %}
+        <tbody class="bg-white divide-y divide-gray-200">
+          {% for submission in submissions %}
+          <tr class="hover:bg-gray-50">
+            <!-- Student -->
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="flex items-center">
+                <div class="flex-shrink-0 h-10 w-10 flex items-center justify-center rounded-full bg-gray-100">
+                  <span class="text-sm font-medium text-gray-700">{{ submission.student.first_name|first }}{{ submission.student.last_name|first }}</span>
+                </div>
+                <div class="ml-4">
+                  <div class="text-sm font-medium text-gray-900">{{ submission.student.first_name }} {{ submission.student.last_name }}</div>
+                  <div class="text-sm text-gray-500 font-mono">{{ submission.student.username }}</div>
+                </div>
+              </div>
+            </td>
+
+            <!-- Quiz -->
+            <td class="px-6 py-4">
+              <div class="text-sm font-medium text-gray-900">{{ submission.quiz.quiz_title }}</div>
+              <div class="text-sm text-gray-500 font-mono">{{ submission.quiz.quiz_no }}</div>
+            </td>
+
+            <!-- Course -->
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="text-sm font-medium text-gray-900">{{ submission.course.course_title }}</div>
+              <div class="text-sm text-gray-500 font-mono">{{ submission.course.course_no }}</div>
+            </td>
+
+            <!-- Submitted At -->
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="text-sm text-gray-900">{{ submission.submitted_at|date:"M d, Y" }}</div>
+              <div class="text-sm text-gray-500">{{ submission.submitted_at|date:"g:i A" }}</div>
+            </td>
+
+            <!-- Marks -->
+            <td class="px-6 py-4 whitespace-nowrap text-center">
+              {% if submission.marks is not None %}
+                <span class="inline-flex items-center rounded-full bg-green-100 px-3 py-1 text-sm font-medium text-green-800">
+                  {{ submission.marks }}/10
+                </span>
+              {% else %}
+                <span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-600">
+                  Not Graded
+                </span>
+              {% endif %}
+            </td>
+
+            <!-- Actions -->
+            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+              <div class="flex items-center justify-end gap-2">
+                <a href="{{ submission.file.url }}" download class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200">
+                  <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                  </svg>
+                  Download
+                </a>
+
+                {% if request.user.is_staff %}
+                  <a href="{% url 'grade_submission' submission.id %}" class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
+                    Grade
+                  </a>
+
+                  <a href="{% url 'remarks' submission.id %}" class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
+                    </svg>
+                    Feedback
+                  </a>
+                {% endif %}
+              </div>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="6" class="px-6 py-12 text-center">
+              <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+              </svg>
+              <h3 class="mt-2 text-sm font-medium text-gray-900">No submissions yet</h3>
+              <p class="mt-1 text-sm text-gray-500">No students have submitted any quizzes yet.</p>
+            </td>
+          </tr>
+          {% endfor %}
         </tbody>
-    </table>
+      </table>
     </div>
+  </div>
 </div>
-{% if messages %}
-    <div id="popup-message-container">
-        {% for message in messages %}
-            <div class="popup-message {{ message.tags }}">
-                {{ message }}
-            </div>
-        {% endfor %}
-    </div>
-{% endif %}
 {% endblock %}

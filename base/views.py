@@ -172,11 +172,15 @@ def dashboard(request):
     course.id: submissions.filter(course=course, marks__isnull=False).aggregate(Sum('marks'))['marks__sum'] or 0
         for course in courses
     }
+    # Calculate totals for dashboard cards
+    total_submissions = sum(submission_counts.values())
+    total_marks = sum(marks_sums.values())
+
     user_agent = request.META.get('HTTP_USER_AGENT')
     user_ip = request.META.get('REMOTE_ADDR')
     device_info = httpagentparser.detect(user_agent)
     device_type = device_info.get("platform", {}).get("name", "Unknown Device")
-    return render(request, 'base/dashboard.html', {'courses': courses, 'quizzes': quizzes, 'submissions': submissions, 'submission_counts': submission_counts, 'marks_sums': marks_sums, 'user_agent': user_agent, 'user_ip': user_ip, 'device_type': device_type})
+    return render(request, 'base/dashboard.html', {'courses': courses, 'quizzes': quizzes, 'submissions': submissions, 'submission_counts': submission_counts, 'marks_sums': marks_sums, 'total_submissions': total_submissions, 'total_marks': total_marks, 'user_agent': user_agent, 'user_ip': user_ip, 'device_type': device_type})
 
 # ===============================
 # Course Management Views

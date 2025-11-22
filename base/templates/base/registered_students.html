@@ -1,141 +1,340 @@
-{% extends 'base/main.html' %}
+{% extends 'base/base_with_sidebar.html' %}
 {% load static %}
-{% block title %}Registered Students{% endblock %}
+
+{% block title %}Registered Users - Mini LMS{% endblock %}
+
 {% block content %}
-<div class="container">
-    <a href="{% url 'register_student' %}"><button id="register-student-btn" class="sub-label"
-            style="left: 86%; position: relative; margin-bottom: 10px; margin-top: 10px;"><i
-                class="fa-solid fa-user-plus"></i> Register Student</button></a>
-    <h1>Registered Students</h1>
-    <div class="table-responsive">
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th>Registration Number</th>
-                    <th>Name</th>
-                    <th>Gender</th>
-                    {% if request.user.is_superuser %}
-                    <th>Actions</th>
-                    {% endif %}
-                </tr>
-            </thead>
-            <tbody>
-                {% for student in students %}
-                <tr>
-                    <td>{{ student.username }}</td>
-                    <td>{{ student.first_name }} {{ student.last_name }}</td>
-                    <td>{{ student.studentprofile.gender }}</td>
-                    {% if request.user.is_superuser %}
-                    <td>
-                        <a href="{% url 'edit_student' student.id %}"><button class="sub-label"
-                                style="padding: 0px; text-align: center; width: 100px; margin-top: 5px;"><i
-                                    class="fa-solid fa-user-edit"></i> Edit</button></a>
-                        <a href="{% url 'delete_student' student.id %}"><button class="sub-danger-label"
-                                style="padding: 0px; text-align: center; width: 100px; margin-top: 5px;"><i
-                                    class="fa-solid fa-trash-can"></i> Delete</button></a>
-                        <a href="{% url 'change_role' student.id %}"><button class="sub-label"
-                                style="padding: 0px; text-align: center; width: 100px; margin-top: 5px;"><i
-                                    class="fa-solid fa-user-shield"></i> Role</button></a>
-                        {% if student.studentprofile.active_status %}
-                        <a href="{% url 'suspend_user' student.id %}"><button class="sub-danger-label"
-                                style="padding: 0px; text-align: center; width: 100px; margin-top: 5px;"><i
-                                    class="fa-solid fa-user-slash"></i> Suspend</button></a>
-                        {% else %}
-                        <a href="{% url 'suspend_user' student.id %}"><button class="sub-label"
-                                style="padding: 0px; text-align: center; width: 100px; margin-top: 5px;"><i
-                                    class="fa-solid fa-user-check"></i> Activate</button></a>
-                        {% endif %}
-                    </td>
-                    {% endif %}
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+<div class="px-4 py-8 sm:px-6 lg:px-8">
+
+  <!-- Page Header -->
+  <div class="mb-8">
+    <div class="sm:flex sm:items-center sm:justify-between">
+      <div>
+        <h1 class="text-2xl font-semibold text-gray-900">User Management</h1>
+        <p class="mt-2 text-sm text-gray-600">Manage students, staff, and administrators</p>
+      </div>
+      {% if request.user.is_superuser %}
+      <div class="mt-4 sm:mt-0">
+        <a href="{% url 'register_student' %}" class="inline-flex items-center gap-2 rounded-md bg-gray-900 px-4 py-2.5 text-sm font-semibold text-white hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2">
+          <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+          </svg>
+          Register New User
+        </a>
+      </div>
+      {% endif %}
     </div>
-    <h1>Staff Members</h1>
-    <div class="table-responsive">
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th>Registration Number</th>
-                    <th>Name</th>
-                    <th>Gender</th>
-                    {% if request.user.is_superuser %}
-                    <th>Actions</th>
-                    {% endif %}
-                </tr>
-            </thead>
-            <tbody>
-                {% for staff in staff %}
-                <tr>
-                    <td>{{ staff.username }}</td>
-                    <td>{{ staff.first_name }} {{ staff.last_name }}</td>
-                    <td>{{ staff.studentprofile.gender }}</td>
-                    {% if request.user.is_superuser %}
-                    <td>
-                        <a href="{% url 'edit_student' staff.id %}"><button class="sub-label"
-                                style="padding: 0px; text-align: center; width: 100px; margin-top: 5px;"><i
-                                    class="fa-solid fa-user-edit"></i> Edit</button></a>
-                        <a href="{% url 'delete_student' staff.id %}"><button class="sub-danger-label"
-                                style="padding: 0px; text-align: center; width: 100px; margin-top: 5px;"><i
-                                    class="fa-solid fa-trash-can"></i> Delete</button></a>
-                        <a href="{% url 'change_role' staff.id %}"><button class="sub-label"
-                                style="padding: 0px; text-align: center; width: 100px; margin-top: 5px;"><i
-                                    class="fa-solid fa-user-shield"></i> Role</button></a>
-                        {% if staff.studentprofile.active_status %}
-                        <a href="{% url 'suspend_user' staff.id %}"><button class="sub-danger-label"
-                                style="padding: 0px; text-align: center; width: 100px; margin-top: 5px;"><i
-                                    class="fa-solid fa-user-slash"></i> Suspend</button></a>
-                        {% else %}
-                        <a href="{% url 'suspend_user' staff.id %}"><button class="sub-label"
-                                style="padding: 0px; text-align: center; width: 100px; margin-top: 5px;"><i
-                                    class="fa-solid fa-user-check"></i> Activate</button></a>
-                        {% endif %}
-                    </td>
-                    {% endif %}
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-    <h1>Super Users</h1>
-    <div class="table-responsive">
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th>Registration Number</th>
-                    <th>Name</th>
-                    <th>Gender</th>
-                    {% if request.user.is_superuser and request.user.username == '14717' %}
-                    <th>Actions</th>
-                    {% endif %}
-                </tr>
-            </thead>
-            <tbody>
-                {% for super_user in super_users %}
-                <tr>
-                    <td>{{ super_user.username }}</td>
-                    <td>{{ super_user.first_name }} {{ super_user.last_name }}</td>
-                    <td>{{ super_user.studentprofile.gender }}</td>
-                    {% if request.user.is_superuser and request.user.username == '14717' %}
-                    <td>
-                        <a href="{% url 'change_role' super_user.id %}"><button class="sub-label"
-                                style="padding: 0px; text-align: center; width: 100px; margin-top: 5px;"><i
-                                    class="fa-solid fa-user-shield"></i> Role</button></a>
-                    </td>
-                    {% endif %}
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-    {% if messages %}
-    <div id="popup-message-container">
-        {% for message in messages %}
-        <div class="popup-message {{ message.tags }}">
-            {{ message }}
+  </div>
+
+  <!-- Students Section -->
+  <div class="mb-8">
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+      <div class="border-b border-gray-200 px-6 py-4">
+        <div class="flex items-center gap-3">
+          <div class="flex h-10 w-10 items-center justify-center rounded-md bg-blue-100">
+            <svg class="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+            </svg>
+          </div>
+          <div>
+            <h2 class="text-lg font-semibold text-gray-900">Students</h2>
+            <p class="text-sm text-gray-600">{{ students|length }} registered student{{ students|length|pluralize }}</p>
+          </div>
         </div>
-        {% endfor %}
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50">
+            <tr>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Student
+              </th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Gender
+              </th>
+              <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Status
+              </th>
+              {% if request.user.is_superuser %}
+              <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Actions
+              </th>
+              {% endif %}
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200">
+            {% for student in students %}
+            <tr class="hover:bg-gray-50">
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="flex items-center">
+                  <div class="flex-shrink-0 h-10 w-10 flex items-center justify-center rounded-full bg-gray-100">
+                    <span class="text-sm font-medium text-gray-700">{{ student.first_name|first }}{{ student.last_name|first }}</span>
+                  </div>
+                  <div class="ml-4">
+                    <div class="text-sm font-medium text-gray-900">{{ student.first_name }} {{ student.last_name }}</div>
+                    <div class="text-sm text-gray-500 font-mono">{{ student.username }}</div>
+                  </div>
+                </div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <span class="text-sm text-gray-900">{{ student.studentprofile.gender }}</span>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-center">
+                {% if student.studentprofile.active_status %}
+                  <span class="inline-flex items-center rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-800">
+                    Active
+                  </span>
+                {% else %}
+                  <span class="inline-flex items-center rounded-full bg-red-100 px-3 py-1 text-xs font-medium text-red-800">
+                    Suspended
+                  </span>
+                {% endif %}
+              </td>
+              {% if request.user.is_superuser %}
+              <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                <div class="flex items-center justify-end gap-2">
+                  <a href="{% url 'edit_student' student.id %}" class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
+                    Edit
+                  </a>
+                  <a href="{% url 'change_role' student.id %}" class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                    </svg>
+                    Role
+                  </a>
+                  {% if student.studentprofile.active_status %}
+                    <a href="{% url 'suspend_user' student.id %}" class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-white bg-red-600 rounded-md hover:bg-red-700">
+                      <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                      </svg>
+                      Suspend
+                    </a>
+                  {% else %}
+                    <a href="{% url 'suspend_user' student.id %}" class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-white bg-green-600 rounded-md hover:bg-green-700">
+                      <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      Activate
+                    </a>
+                  {% endif %}
+                  <a href="{% url 'delete_student' student.id %}" class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-white bg-red-600 rounded-md hover:bg-red-700">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                    Delete
+                  </a>
+                </div>
+              </td>
+              {% endif %}
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="{% if request.user.is_superuser %}4{% else %}3{% endif %}" class="px-6 py-12 text-center">
+                <p class="text-sm text-gray-500">No students registered yet.</p>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
     </div>
-    {% endif %}
-    {% endblock %}
+  </div>
+
+  <!-- Staff Section -->
+  <div class="mb-8">
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+      <div class="border-b border-gray-200 px-6 py-4">
+        <div class="flex items-center gap-3">
+          <div class="flex h-10 w-10 items-center justify-center rounded-md bg-purple-100">
+            <svg class="h-6 w-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            </svg>
+          </div>
+          <div>
+            <h2 class="text-lg font-semibold text-gray-900">Staff Members</h2>
+            <p class="text-sm text-gray-600">{{ staff|length }} staff member{{ staff|length|pluralize }}</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50">
+            <tr>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Staff Member
+              </th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Gender
+              </th>
+              <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Status
+              </th>
+              {% if request.user.is_superuser %}
+              <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Actions
+              </th>
+              {% endif %}
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200">
+            {% for staff_member in staff %}
+            <tr class="hover:bg-gray-50">
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="flex items-center">
+                  <div class="flex-shrink-0 h-10 w-10 flex items-center justify-center rounded-full bg-purple-100">
+                    <span class="text-sm font-medium text-purple-700">{{ staff_member.first_name|first }}{{ staff_member.last_name|first }}</span>
+                  </div>
+                  <div class="ml-4">
+                    <div class="text-sm font-medium text-gray-900">{{ staff_member.first_name }} {{ staff_member.last_name }}</div>
+                    <div class="text-sm text-gray-500 font-mono">{{ staff_member.username }}</div>
+                  </div>
+                </div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <span class="text-sm text-gray-900">{{ staff_member.studentprofile.gender }}</span>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-center">
+                {% if staff_member.studentprofile.active_status %}
+                  <span class="inline-flex items-center rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-800">
+                    Active
+                  </span>
+                {% else %}
+                  <span class="inline-flex items-center rounded-full bg-red-100 px-3 py-1 text-xs font-medium text-red-800">
+                    Suspended
+                  </span>
+                {% endif %}
+              </td>
+              {% if request.user.is_superuser %}
+              <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                <div class="flex items-center justify-end gap-2">
+                  <a href="{% url 'edit_student' staff_member.id %}" class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
+                    Edit
+                  </a>
+                  <a href="{% url 'change_role' staff_member.id %}" class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                    </svg>
+                    Role
+                  </a>
+                  {% if staff_member.studentprofile.active_status %}
+                    <a href="{% url 'suspend_user' staff_member.id %}" class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-white bg-red-600 rounded-md hover:bg-red-700">
+                      <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                      </svg>
+                      Suspend
+                    </a>
+                  {% else %}
+                    <a href="{% url 'suspend_user' staff_member.id %}" class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-white bg-green-600 rounded-md hover:bg-green-700">
+                      <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      Activate
+                    </a>
+                  {% endif %}
+                  <a href="{% url 'delete_student' staff_member.id %}" class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-white bg-red-600 rounded-md hover:bg-red-700">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                    Delete
+                  </a>
+                </div>
+              </td>
+              {% endif %}
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="{% if request.user.is_superuser %}4{% else %}3{% endif %}" class="px-6 py-12 text-center">
+                <p class="text-sm text-gray-500">No staff members registered yet.</p>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Super Users Section -->
+  <div class="mb-8">
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+      <div class="border-b border-gray-200 px-6 py-4">
+        <div class="flex items-center gap-3">
+          <div class="flex h-10 w-10 items-center justify-center rounded-md bg-amber-100">
+            <svg class="h-6 w-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+            </svg>
+          </div>
+          <div>
+            <h2 class="text-lg font-semibold text-gray-900">Administrators</h2>
+            <p class="text-sm text-gray-600">{{ super_users|length }} administrator{{ super_users|length|pluralize }}</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50">
+            <tr>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Administrator
+              </th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Gender
+              </th>
+              {% if request.user.is_superuser and request.user.username == '14717' %}
+              <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Actions
+              </th>
+              {% endif %}
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200">
+            {% for super_user in super_users %}
+            <tr class="hover:bg-gray-50">
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="flex items-center">
+                  <div class="flex-shrink-0 h-10 w-10 flex items-center justify-center rounded-full bg-amber-100">
+                    <span class="text-sm font-medium text-amber-700">{{ super_user.first_name|first }}{{ super_user.last_name|first }}</span>
+                  </div>
+                  <div class="ml-4">
+                    <div class="text-sm font-medium text-gray-900">{{ super_user.first_name }} {{ super_user.last_name }}</div>
+                    <div class="text-sm text-gray-500 font-mono">{{ super_user.username }}</div>
+                  </div>
+                </div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <span class="text-sm text-gray-900">{{ super_user.studentprofile.gender }}</span>
+              </td>
+              {% if request.user.is_superuser and request.user.username == '14717' %}
+              <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                <a href="{% url 'change_role' super_user.id %}" class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700">
+                  <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                  </svg>
+                  Change Role
+                </a>
+              </td>
+              {% endif %}
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="{% if request.user.is_superuser and request.user.username == '14717' %}3{% else %}2{% endif %}" class="px-6 py-12 text-center">
+                <p class="text-sm text-gray-500">No administrators registered yet.</p>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

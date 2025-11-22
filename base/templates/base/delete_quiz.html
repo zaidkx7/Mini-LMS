@@ -1,48 +1,106 @@
-{% extends 'base/main.html' %}
+{% extends 'base/base_with_sidebar.html' %}
 {% load static %}
-{% block title %}Delete Quiz{% endblock %}
+
+{% block title %}Delete Quiz - Mini LMS{% endblock %}
+
 {% block content %}
-<div class="container">
-    <div class="row">
-        <div class="col-md-6 offset-md-3">
-            <div class="card">
-                <div class="card-header">
-                    <h4 style="text-align: center;"><strong>Delete Quiz</strong></h4>
-                </div>
-                <div class="card-body">
-                    <form method="POST">
-                        {% csrf_token %}
-                        <div class="form-group">
-                            <label for="quiz_id">Quiz ID</label>
-                            <input type="text" class="form-control" id="quiz_id" name="quiz_id" value="{{ quiz.id }}" readonly>
-                        </div>
-                        <div class="form-group">
-                            <label for="quiz_title">Quiz Title</label>
-                            <input type="text" class="form-control" id="quiz_title" name="quiz_title" value="{{ quiz.quiz_title }}" readonly>
-                        </div>
-                        <div class="form-group">
-                            <label for="quiz_no">Quiz No</label>
-                            <input type="text" class="form-control" id="quiz_no" name="quiz_no" value="{{ quiz.quiz_no }}" readonly>
-                        </div>
-                        <div class="form-group">
-                            <label for="due_date">Deadline</label>
-                            <input type="datetime-local" class="form-control" id="due_date" name="due_date" value="{{ quiz.due_date }}" readonly>
-                        </div>
-                        <button type="submit" class="cstm-btn" style="background-color: #a11510; color: white; width: 100%; border-radius: 5px;"><i class="fa-solid fa-trash-can"></i> Delete Quiz</button>
-                        <a href="{% url 'quizzes' quiz.course.id %}"><button type="button" class="cstm-btn" style="margin-top: 10px; background-color: #119247; color: white; width: 100%; border-radius: 5px;"><i class="fa-solid fa-xmark"></i> Cancel</button></a>
-                    </form>
-                </div>
-            </div>
+<div class="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+  <div class="mx-auto max-w-2xl">
+
+    <!-- Page Header -->
+    <div class="mb-8">
+      <div class="flex items-center gap-3">
+        <a href="{% url 'quizzes' quiz.course.id %}" class="inline-flex items-center justify-center h-10 w-10 rounded-md border border-gray-300 bg-white text-gray-600 hover:bg-gray-50 hover:text-gray-900">
+          <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+          </svg>
+        </a>
+        <div>
+          <h1 class="text-2xl font-semibold text-gray-900">Delete Quiz</h1>
+          <p class="mt-1 text-sm text-gray-600">Permanently remove this quiz from the course</p>
         </div>
+      </div>
     </div>
-</div>
-{% if messages %}
-    <div id="popup-message-container">
-        {% for message in messages %}
-            <div class="popup-message {{ message.tags }}">
-                {{ message }}
+
+    <!-- Delete Confirmation Card -->
+    <div class="bg-white rounded-lg shadow-sm border border-red-200">
+      <!-- Warning Header -->
+      <div class="border-b border-red-200 bg-red-50 px-6 py-4">
+        <div class="flex items-center gap-3">
+          <div class="flex h-10 w-10 items-center justify-center rounded-full bg-red-100">
+            <svg class="h-6 w-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+          </div>
+          <div>
+            <h2 class="text-lg font-semibold text-red-900">Confirm Deletion</h2>
+            <p class="text-sm text-red-700">This action cannot be undone</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quiz Details -->
+      <div class="px-6 py-6">
+        <div class="rounded-lg bg-gray-50 border border-gray-200 p-4 mb-6">
+          <div class="flex items-start gap-3">
+            <div class="flex-shrink-0">
+              <svg class="h-10 w-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
             </div>
-        {% endfor %}
+            <div class="flex-1">
+              <p class="text-sm font-medium text-gray-600 mb-1">You are about to delete:</p>
+              <p class="text-lg font-semibold text-gray-900">{{ quiz.quiz_title }}</p>
+              <div class="mt-2 space-y-1 text-sm text-gray-600">
+                <p><span class="font-medium">Quiz No:</span> <span class="font-mono">{{ quiz.quiz_no }}</span></p>
+                <p><span class="font-medium">Course:</span> {{ quiz.course.course_title }}</p>
+                <p><span class="font-medium">Due Date:</span> {{ quiz.due_date|date:"M d, Y g:i A" }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Warning Message -->
+        <div class="rounded-lg bg-amber-50 border border-amber-200 p-4 mb-6">
+          <div class="flex gap-3">
+            <svg class="h-5 w-5 text-amber-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <div class="text-sm text-amber-800">
+              <p class="font-medium mb-1">Warning: This will permanently delete:</p>
+              <ul class="list-disc list-inside space-y-1 ml-2">
+                <li>The quiz and all its information</li>
+                <li>All student submissions for this quiz</li>
+                <li>All grades and feedback associated with this quiz</li>
+                <li>Any uploaded help files</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Confirmation Form -->
+        <form method="POST">
+          {% csrf_token %}
+          <div class="flex items-center justify-between pt-4 border-t border-gray-200">
+            <a href="{% url 'quizzes' quiz.course.id %}" class="inline-flex items-center gap-2 rounded-md border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2">
+              <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+              Cancel
+            </a>
+            <button
+              type="submit"
+              class="inline-flex items-center gap-2 rounded-md bg-red-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-600 focus:ring-offset-2"
+            >
+              <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+              Delete Quiz
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
-{% endif %}
+  </div>
+</div>
 {% endblock %}

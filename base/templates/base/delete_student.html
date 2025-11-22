@@ -1,23 +1,118 @@
-{% extends 'base/main.html' %}
+{% extends 'base/base_with_sidebar.html' %}
 {% load static %}
-{% block title %}Delete Student{% endblock %}
+
+{% block title %}Delete User - Mini LMS{% endblock %}
+
 {% block content %}
-<div class="container">
-    <h1>Delete Student</h1>
-    <p>Are you sure you want to delete {{ student.first_name }} {{ student.last_name }}?</p>
-    <form method="post">
-        {% csrf_token %}
-        <button type="submit" class="sub-danger-label" style="padding: 0px; text-align: center; width: 100px; margin-top: 5px;"><i class="fa-solid fa-trash-can"></i> Delete</button>
-        <a href="{% url 'registered_students' %}"><button type="button" style="padding: 0px; text-align: center; width: 100px; margin-top: 5px;" class="sub-label"><i class="fa-solid fa-xmark"></i> Cancel</button></a>
-    </form>
-</div>
-{% if messages %}
-    <div id="popup-message-container">
-        {% for message in messages %}
-            <div class="popup-message {{ message.tags }}">
-                {{ message }}
-            </div>
-        {% endfor %}
+<div class="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+  <div class="mx-auto max-w-2xl">
+
+    <!-- Page Header -->
+    <div class="mb-8">
+      <div class="flex items-center gap-3">
+        <a href="{% url 'registered_students' %}" class="inline-flex items-center justify-center h-10 w-10 rounded-md border border-gray-300 bg-white text-gray-600 hover:bg-gray-50 hover:text-gray-900">
+          <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+          </svg>
+        </a>
+        <div>
+          <h1 class="text-2xl font-semibold text-gray-900">Delete User</h1>
+          <p class="mt-1 text-sm text-gray-600">Permanently remove user from system</p>
+        </div>
+      </div>
     </div>
-{% endif %}
+
+    <!-- Warning Card -->
+    <div class="bg-white rounded-lg shadow-sm border border-red-200">
+      <!-- Warning Header -->
+      <div class="border-b border-red-200 bg-red-50 px-6 py-4">
+        <div class="flex items-center gap-3">
+          <div class="flex h-10 w-10 items-center justify-center rounded-full bg-red-100">
+            <svg class="h-6 w-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+          </div>
+          <div>
+            <h2 class="text-lg font-semibold text-red-900">Confirm User Deletion</h2>
+            <p class="text-sm text-red-700">This action cannot be undone</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- User Details -->
+      <div class="px-6 py-6">
+        <div class="mb-6">
+          <h3 class="text-sm font-medium text-gray-700 mb-3">User Information</h3>
+          <div class="bg-gray-50 rounded-lg p-4 space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="text-sm font-medium text-gray-600">Name:</span>
+              <span class="text-sm font-semibold text-gray-900">{{ student.first_name }} {{ student.last_name }}</span>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="text-sm font-medium text-gray-600">Registration Number:</span>
+              <span class="text-sm font-mono font-semibold text-gray-900">{{ student.username }}</span>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="text-sm font-medium text-gray-600">Gender:</span>
+              <span class="text-sm font-semibold text-gray-900">{{ student.gender }}</span>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="text-sm font-medium text-gray-600">Role:</span>
+              <span class="text-sm font-semibold text-gray-900">
+                {% if student.is_superuser %}
+                  Administrator
+                {% elif student.is_staff %}
+                  Staff/Instructor
+                {% else %}
+                  Student
+                {% endif %}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Warning Message -->
+        <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+          <div class="flex gap-3">
+            <svg class="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+            <div class="text-sm text-red-800">
+              <p class="font-medium mb-2">This will permanently delete:</p>
+              <ul class="list-disc list-inside space-y-1 ml-2">
+                <li>User account and profile information</li>
+                <li>All quiz submissions and grades</li>
+                <li>All enrollment records</li>
+                <li>All associated data and history</li>
+              </ul>
+              <p class="mt-3 font-semibold">This action is irreversible. Are you sure you want to continue?</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Delete Form -->
+        <form method="POST">
+          {% csrf_token %}
+          <div class="flex items-center justify-between pt-4 border-t border-gray-200">
+            <a href="{% url 'registered_students' %}" class="inline-flex items-center gap-2 rounded-md border border-gray-300 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2">
+              <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+              Cancel
+            </a>
+            <button
+              type="submit"
+              class="inline-flex items-center gap-2 rounded-md bg-red-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-600 focus:ring-offset-2"
+            >
+              <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+              Delete User
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
 {% endblock %}

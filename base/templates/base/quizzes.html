@@ -1,121 +1,209 @@
-{% extends 'base/main.html' %}
+{% extends 'base/base_with_sidebar.html' %}
 {% load static %}
-{% block title %}Quizzes{% endblock %}
+
+{% block title %}Quizzes - {{ course.course_title }} - Mini LMS{% endblock %}
+
 {% block content %}
-<div class="quiz-main-container">
-    <div id="course-container" class="quiz-main-container-box">
-        <h3 class="quiz-title"><strong>Course ID: </strong>{{course.course_no}}</h3>
-        <h3 class="quiz-title"><strong>Course Title: </strong>{{course.course_title}}</h3>
+<div class="px-4 py-8 sm:px-6 lg:px-8">
+
+  <!-- Page Header with Course Info -->
+  <div class="mb-8">
+    <div class="flex items-center gap-3 mb-4">
+      <a href="{% url 'courses' %}" class="inline-flex items-center justify-center h-10 w-10 rounded-md border border-gray-300 bg-white text-gray-600 hover:bg-gray-50 hover:text-gray-900">
+        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+        </svg>
+      </a>
+      <div>
+        <h1 class="text-2xl font-semibold text-gray-900">{{ course.course_title }}</h1>
+        <p class="mt-1 text-sm text-gray-600 font-mono">{{ course.course_no }}</p>
+      </div>
     </div>
-    <div id="quiz-container" class="quiz-main-container-box">
-        <h3 class="quiz-title-2"><strong>Quizzes</strong></h3>
-        <div class="table-responsive">
-            <table style="vertical-align: middle" class="table table-hover table-bordered">
-                <thead>
-                    <tr>
-                        <th width="4%"><strong>Quiz No</strong></th>
-                        <th width="12%"><strong>Title</strong></th>
-                        <th width="50%"><strong>Description</strong></th>
-                        <th width="10%"><strong>Help File</strong></th>
-                        <th width="3%"><strong>Allow File Upload</strong></th>
-                        <th width="7%"><strong>Date Added</strong></th>
-                        <th width="7%"><strong>Last Date</strong></th>
-                        <th width="15%"><strong>Upload</strong></th>
-                        {% if request.user.is_staff or request.user.is_superuser%}
-                        <th width="15%"><strong>Action</strong></th>
-                        {% endif %}
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for quiz in quizzes %}
-                    <tr>
-                        <td class="m">{{forloop.counter}}</td>
-                        <td class="m">{{quiz.quiz_title}}</td>
-                        <td class="m">
-                            {{quiz.description | safe}}
-                        </td>
-                        <td class="m" style="text-align: center;">
-                            {% if quiz.help_file %}
-                            <a href="{{quiz.help_file.url}}" target="_blank" class="success-label" download>Download</a>
-                            {% endif %}
-                        </td>
-                        <td class="m">
-                            <span class="success-label" style="text-align: center;"><i class="fa fa-check"></i> Yes</span>
-                        </td>
-                        <td class="m" width="10%">
-                            {{quiz.quiz_created_at | date:"d-F-Y"}}
-                        </td>
-                        <td class="m" width="10%">
-                            {{quiz.due_date | date:"d-F-Y"}}
-                        </td>
-                        <td class="m" width="15%" style="text-align: center;">
-                            {% if quiz.id in submitted_quizzes %}
-                            <span class="success-label"><i class="fa fa-check"></i> Uploaded</span><br><br>
-                            {% for submission in submissions %}
-                            {% if submission.quiz.id == quiz.id %}
-                            <a href="{{ submission.file.url }}" download>
-                                <button type="submit" class="btn btn-xs"
-                                    style="padding: 0px 10px 0px 10px; margin-bottom: 5px; background-color: #119247; color: white; font-size: small; white-space: nowrap;"><i
-                                        class="fa fa-download"></i> Download</button>
-                            </a>
-                            {% endif %}
-                            {% endfor %}
-                            {% if quiz.due_date > now %}
-                            <a href="{% url 'submit_quiz' quiz.id %}">
-                                <button type="submit" class="btn btn-xs"
-                                    style="padding: 0px 10px 0px 10px; background-color: #c99f14fb; color: white; font-size: small; white-space: nowrap;"><i
-                                        class="fa fa-upload"></i> Update</button>
-                            </a>
-                            {% else %}
-                            <span class="sub-danger-label"><i class="fa fa-times"></i> Closed</span>
-                            {% endif %}
-                            {% else %}
-                            {% if quiz.due_date > now %}
-                            <a href="{% url 'submit_quiz' quiz.id %}">
-                                <button type="submit" class="btn btn-xs"
-                                    style="padding: 0px 10px 0px 10px; background-color: #119247; color: white; font-size: small; white-space: nowrap;"><i
-                                        class="fa fa-upload"></i> Upload</button>
-                            </a>
-                            {% else %}
-                            <span class="sub-danger-label"><i class="fa fa-times"></i> Closed</span>
-                            {% endif %}
-                            {% endif %}
-                        </td>
-                        <td class="m" width="15%" style="text-align: center;">
-                            {% if request.user.is_staff or request.user.is_superuser or quiz.due_date <= now %}
-                            <a href="{% url 'view_quiz_submissions' quiz.id %}">
-                                <button type="submit" class="btn btn-xs"
-                                    style="padding: 0px 10px 0px 10px; background-color: #119247; margin-bottom: 5px; color: white; font-size: small; white-space: nowrap;"><i
-                                        class="fa fa-eye"></i> View</button>
-                            </a>
-                            {% endif %}
-                            {% if request.user.is_staff or request.user.is_superuser %}
-                            <a href="{% url 'edit_quiz' quiz.id %}">
-                                <button type="submit" class="btn btn-xs"
-                                    style="padding: 0px 10px 0px 10px; background-color: #bdba08; color: white; font-size: small; white-space: nowrap;"><i
-                                        class="fa fa-edit"></i> Edit</button>
-                            </a>
-                            <a href="{% url 'delete_quiz' quiz.id %}">
-                                <button type="submit" class="btn btn-xs"
-                                    style="margin-top: 5px; padding: 0px 10px 0px 10px; background-color: #ab0a0a; color: white; font-size: small; white-space: nowrap;"><i
-                                        class="fa fa-trash"></i> Delete</button>
-                            </a>
-                            {% endif %}
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+
+    <!-- Course Info Card -->
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+      <div class="sm:flex sm:items-center sm:justify-between">
+        <div class="flex items-center gap-3">
+          <div class="flex h-12 w-12 items-center justify-center rounded-md bg-gray-100">
+            <svg class="h-6 w-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+          </div>
+          <div>
+            <h2 class="text-lg font-semibold text-gray-900">Course Quizzes</h2>
+            <p class="text-sm text-gray-600">{{ quizzes|length }} quiz{{ quizzes|length|pluralize:"zes" }} available</p>
+          </div>
         </div>
+        {% if request.user.is_staff or request.user.is_superuser %}
+        <div class="mt-4 sm:mt-0">
+          <a href="{% url 'add_quiz' %}" class="inline-flex items-center gap-2 rounded-md bg-gray-900 px-4 py-2.5 text-sm font-semibold text-white hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2">
+            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+            </svg>
+            Add New Quiz
+          </a>
+        </div>
+        {% endif %}
+      </div>
     </div>
-</div>
-{% if messages %}
-    <div id="popup-message-container">
-        {% for message in messages %}
-            <div class="popup-message {{ message.tags }}">
-                {{ message }}
+  </div>
+
+  <!-- Quizzes List -->
+  <div class="space-y-4">
+    {% for quiz in quizzes %}
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">
+      <div class="p-6">
+        <div class="flex items-start justify-between mb-4">
+          <div class="flex-1">
+            <div class="flex items-center gap-3 mb-2">
+              <span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-700 font-mono">
+                #{{ forloop.counter }}
+              </span>
+              <h3 class="text-lg font-semibold text-gray-900">{{ quiz.quiz_title }}</h3>
             </div>
-        {% endfor %}
+            <div class="prose prose-sm max-w-none text-gray-600 mb-4">
+              {{ quiz.description | safe }}
+            </div>
+
+            <!-- Quiz Meta Info -->
+            <div class="flex flex-wrap gap-4 text-sm text-gray-600">
+              <div class="flex items-center gap-1.5">
+                <svg class="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                <span>Added: {{ quiz.quiz_created_at|date:"M d, Y" }}</span>
+              </div>
+              <div class="flex items-center gap-1.5">
+                <svg class="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span class="{% if quiz.due_date < now %}text-red-600 font-medium{% endif %}">
+                  Due: {{ quiz.due_date|date:"M d, Y" }}
+                </span>
+              </div>
+              {% if quiz.help_file %}
+              <div class="flex items-center gap-1.5">
+                <svg class="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+                </svg>
+                <a href="{{ quiz.help_file.url }}" target="_blank" download class="text-blue-600 hover:text-blue-700 font-medium">
+                  Download Help File
+                </a>
+              </div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex flex-wrap items-center gap-2 pt-4 border-t border-gray-200">
+          <!-- Student Actions -->
+          {% if not request.user.is_staff and not request.user.is_superuser %}
+            {% if quiz.id in submitted_quizzes %}
+              <span class="inline-flex items-center gap-1 rounded-md bg-green-100 px-3 py-1.5 text-xs font-medium text-green-800">
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                </svg>
+                Submitted
+              </span>
+              {% for submission in submissions %}
+                {% if submission.quiz.id == quiz.id %}
+                  <a href="{{ submission.file.url }}" download class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                    </svg>
+                    Download My Submission
+                  </a>
+                {% endif %}
+              {% endfor %}
+              {% if quiz.due_date > now %}
+                <a href="{% url 'submit_quiz' quiz.id %}" class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-white bg-amber-600 rounded-md hover:bg-amber-700">
+                  <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                  </svg>
+                  Update Submission
+                </a>
+              {% else %}
+                <span class="inline-flex items-center gap-1 rounded-md bg-red-100 px-3 py-1.5 text-xs font-medium text-red-800">
+                  <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                  </svg>
+                  Closed
+                </span>
+              {% endif %}
+            {% else %}
+              {% if quiz.due_date > now %}
+                <a href="{% url 'submit_quiz' quiz.id %}" class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-white bg-green-600 rounded-md hover:bg-green-700">
+                  <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                  </svg>
+                  Submit Quiz
+                </a>
+              {% else %}
+                <span class="inline-flex items-center gap-1 rounded-md bg-red-100 px-3 py-1.5 text-xs font-medium text-red-800">
+                  <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                  </svg>
+                  Closed
+                </span>
+              {% endif %}
+            {% endif %}
+          {% endif %}
+
+          <!-- View Submissions (Staff or after deadline) -->
+          {% if request.user.is_staff or request.user.is_superuser or quiz.due_date <= now %}
+            <a href="{% url 'view_quiz_submissions' quiz.id %}" class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200">
+              <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+              </svg>
+              View Submissions
+            </a>
+          {% endif %}
+
+          <!-- Staff Actions -->
+          {% if request.user.is_staff or request.user.is_superuser %}
+            <a href="{% url 'edit_quiz' quiz.id %}" class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200">
+              <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+              </svg>
+              Edit
+            </a>
+            <a href="{% url 'delete_quiz' quiz.id %}" class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-white bg-red-600 rounded-md hover:bg-red-700">
+              <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+              Delete
+            </a>
+          {% endif %}
+        </div>
+      </div>
     </div>
-{% endif %}
+    {% empty %}
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-12 text-center">
+      <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+      </svg>
+      <h3 class="mt-2 text-sm font-medium text-gray-900">No quizzes available</h3>
+      <p class="mt-1 text-sm text-gray-500">
+        {% if request.user.is_staff or request.user.is_superuser %}
+        Get started by creating a new quiz for this course.
+        {% else %}
+        No quizzes have been added to this course yet.
+        {% endif %}
+      </p>
+      {% if request.user.is_staff or request.user.is_superuser %}
+      <div class="mt-6">
+        <a href="{% url 'add_quiz' %}" class="inline-flex items-center gap-2 rounded-md bg-gray-900 px-4 py-2 text-sm font-semibold text-white hover:bg-gray-800">
+          <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+          </svg>
+          Add Quiz
+        </a>
+      </div>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+</div>
 {% endblock %}

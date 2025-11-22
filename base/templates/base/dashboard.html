@@ -1,74 +1,203 @@
-{% extends 'base/main.html' %}
+{% extends 'base/base_with_sidebar.html' %}
 {% load static %}
 {% load custom_tags %}
-{% block title %}Dashboard{% endblock %}
+
+{% block title %}Dashboard - Mini LMS{% endblock %}
+
 {% block content %}
-<style>
-    body {
-        font-size: small;
-    }
-</style>
-<div class="main-container">
-    <div class="dashboard-title-container">
-        <h3><strong>DASHBOARD</strong></h3>
-    </div>
-    <div class="main-container-box" id="box1">
-        {% if user.studentprofile.gender == 'Female' %}
-        <img src="{% static 'images/fmale.png' %}" alt="female" class="profile-pic">
-        {% else %}
-        <img src="{% static 'images/male.png' %}" alt="male" class="profile-pic">
-        {% endif %}
-        <h4 class="profile-name"><strong>{{user.first_name | upper}} {{user.last_name | upper}}</strong></h4>
-        <h4 class="profile-id"><strong>{{user.username | upper}}</strong></h4>
-    </div>
-    <div class="main-container-box" id="box2">
-        <div class="table-responsive">
-            <table class="table table-bordered md">
-                <thead>
-                <tr>
-                    <th rowspan="2" width="15%">Course ID</th>
-                    <th rowspan="2" width="40%">Title</th>
-                    <th rowspan="2" width="15%">Submissions</th>
-                    <th rowspan="2" width="15%">Quiz Submitted</th>
-                    <th rowspan="2" width="15%">Marks</th>
-                    <th rowspan="2" width="15%">Total Quizzes</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for course in courses %}
-                <tr>
-                    <td>{{course.course_no}}</td>
-                    <td>{{course.course_title}}</td>
-                    <td><a href="{% url 'quizzes' course.id %}"><input type="button" name="view" value="View Quizzes"
-                        class="cstm-dead-btn view-deadline-btn"></a>
-                    </td>
-                    <td class="text-center">
-                        <span class="sub-label">{{ submission_counts|get_item:course.id|default:0 }} Submitted</span>
-                    </td>
-                    <td class="text-center">
-                        <span class="sub-label">{{ marks_sums|get_item:course.id|default:0 }} Marks</span>
-                    </td>
-                    <td class="text-center">
-                        {% if course.quiz_set.count > 1 %}
-                        <span class="total-label" id="quizzes-label">{{course.quiz_set.count}} Quizzes</span><br><br>
-                        {% else %}
-                        <span class="total-label" id="quizzes-label">{{course.quiz_set.count}} Quiz</span><br><br>
-                        {% endif %}
-                    </td>
-                </tr>
-                {% endfor %}
-                </tbody>
-            </table>
+<div class="px-4 py-8 sm:px-6 lg:px-8">
+
+  <!-- Welcome Header -->
+  <div class="mb-8">
+    <h1 class="text-2xl font-semibold text-gray-900">Welcome back, {{ user.first_name }}!</h1>
+    <p class="mt-1 text-sm text-gray-600">Here's an overview of your courses and progress</p>
+  </div>
+
+  <!-- Profile and Stats Section -->
+  <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">
+
+    <!-- Profile Card -->
+    <div class="lg:col-span-1">
+      <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <div class="text-center">
+          <!-- Profile Picture -->
+          <div class="mx-auto h-24 w-24 mb-4">
+            {% if user.studentprofile.gender == 'Female' %}
+            <img src="{% static 'images/fmale.png' %}" alt="Profile" class="h-full w-full rounded-full border-2 border-gray-200">
+            {% else %}
+            <img src="{% static 'images/male.png' %}" alt="Profile" class="h-full w-full rounded-full border-2 border-gray-200">
+            {% endif %}
+          </div>
+
+          <!-- User Info -->
+          <h3 class="text-lg font-semibold text-gray-900">{{ user.first_name }} {{ user.last_name }}</h3>
+          <p class="text-sm text-gray-600 font-mono mt-1">{{ user.username }}</p>
+
+          <!-- Quick Actions -->
+          <div class="mt-6 space-y-2">
+            <a href="{% url 'courses' %}" class="block w-full rounded-md bg-gray-900 px-3 py-2 text-sm font-medium text-white hover:bg-gray-800">
+              View All Courses
+            </a>
+            <a href="{% url 'view_overall_rank' %}" class="block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
+              View Rankings
+            </a>
+          </div>
         </div>
+      </div>
     </div>
-</div>
-{% if messages %}
-    <div id="popup-message-container">
-        {% for message in messages %}
-            <div class="popup-message {{ message.tags }}">
-                {{ message }}
+
+    <!-- Stats Cards (Vertical Stack) -->
+    <div class="lg:col-span-3">
+      <div class="space-y-4">
+
+        <!-- Total Courses -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <div class="flex items-center">
+            <div class="flex-shrink-0">
+              <div class="flex h-12 w-12 items-center justify-center rounded-md bg-blue-100">
+                <svg class="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                </svg>
+              </div>
             </div>
-        {% endfor %}
+            <div class="ml-4 flex-1">
+              <p class="text-sm font-medium text-gray-600">Total Courses</p>
+              <p class="text-2xl font-semibold text-gray-900">{{ courses.count }}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Total Quizzes Submitted -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <div class="flex items-center">
+            <div class="flex-shrink-0">
+              <div class="flex h-12 w-12 items-center justify-center rounded-md bg-green-100">
+                <svg class="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+            </div>
+            <div class="ml-4 flex-1">
+              <p class="text-sm font-medium text-gray-600">Quizzes Submitted</p>
+              <p class="text-2xl font-semibold text-gray-900">
+                {{ total_submissions|default:0 }}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Total Marks -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <div class="flex items-center">
+            <div class="flex-shrink-0">
+              <div class="flex h-12 w-12 items-center justify-center rounded-md bg-amber-100">
+                <svg class="h-6 w-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                </svg>
+              </div>
+            </div>
+            <div class="ml-4 flex-1">
+              <p class="text-sm font-medium text-gray-600">Total Marks</p>
+              <p class="text-2xl font-semibold text-gray-900">
+                {{ total_marks|default:0 }}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
-{% endif %}
+  </div>
+
+  <!-- Courses Section -->
+  <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+    <div class="border-b border-gray-200 px-6 py-4">
+      <h2 class="text-lg font-semibold text-gray-900">My Courses</h2>
+    </div>
+
+    <div class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+          <tr>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Course
+            </th>
+            <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Total Quizzes
+            </th>
+            <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Submitted
+            </th>
+            <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Marks Earned
+            </th>
+            <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Actions
+            </th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+          {% for course in courses %}
+          <tr class="hover:bg-gray-50">
+            <!-- Course Info -->
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="flex items-center">
+                <div class="flex-shrink-0 h-10 w-10 flex items-center justify-center rounded-md bg-gray-100">
+                  <svg class="h-6 w-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                  </svg>
+                </div>
+                <div class="ml-4">
+                  <div class="text-sm font-medium text-gray-900">{{ course.course_title }}</div>
+                  <div class="text-sm text-gray-500 font-mono">{{ course.course_no }}</div>
+                </div>
+              </div>
+            </td>
+
+            <!-- Total Quizzes -->
+            <td class="px-6 py-4 whitespace-nowrap text-center">
+              <span class="inline-flex items-center rounded-full bg-amber-100 px-3 py-1 text-xs font-medium text-amber-800">
+                {{ course.quiz_set.count }} {% if course.quiz_set.count == 1 %}Quiz{% else %}Quizzes{% endif %}
+              </span>
+            </td>
+
+            <!-- Submitted -->
+            <td class="px-6 py-4 whitespace-nowrap text-center">
+              <span class="inline-flex items-center rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-800">
+                {{ submission_counts|get_item:course.id|default:0 }} Submitted
+              </span>
+            </td>
+
+            <!-- Marks -->
+            <td class="px-6 py-4 whitespace-nowrap text-center">
+              <span class="inline-flex items-center rounded-full bg-blue-100 px-3 py-1 text-xs font-medium text-blue-800">
+                {{ marks_sums|get_item:course.id|default:0 }} Points
+              </span>
+            </td>
+
+            <!-- Actions -->
+            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+              <a href="{% url 'quizzes' course.id %}" class="inline-flex items-center gap-1 text-gray-900 hover:text-gray-700">
+                <span>View Quizzes</span>
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+              </a>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="5" class="px-6 py-12 text-center">
+              <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+              </svg>
+              <h3 class="mt-2 text-sm font-medium text-gray-900">No courses available</h3>
+              <p class="mt-1 text-sm text-gray-500">Get started by enrolling in a course.</p>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
 {% endblock %}

@@ -1,71 +1,130 @@
-{% extends 'base/main.html' %}
+{% extends 'base/base_with_sidebar.html' %}
 {% load static %}
-{% block title %} Courses {% endblock %}
-{% block content %}
-<style>
-    a {
-        text-decoration: none;
-        color: black;
-    }
 
-    a:hover {
-        color: black;
-        text-decoration: none;
-    }
-</style>
-<div class="quiz-main-container" style="height: 88vh;">
-    <div id="quiz-container" class="quiz-main-container-box">
-        <h3 class="quiz-title-2"><strong>Courses</strong></h3>
-        <div class="table-responsive">
-            <table id="course-table" style="vertical-align: middle; min-width: 100%;"
-                class="table table-hover table-bordered">
-            <thead>
-                <tr>
-                    <th width="4%"><strong>Course ID</strong></th>
-                    <th width="12%"><strong>Course Title</strong></th>
-                    {% if user.is_staff %}
-                    <th width="2%" style="text-align: center;"><strong>Action</strong></th>
-                    {% endif %}
-                </tr>
-            </thead>
-            <tbody>
-                {% for course in courses %}
-                <tr>
-                    <td class="m">{{course.course_no}}</td>
-                    <td class="m"><a href="{% url 'quizzes' course.id %}">{{course.course_title}}</a></td>
-                    {% if user.is_staff %}
-                    <td class="m" style="display: flex; justify-content: center; align-items: center; gap: 10px;">
-                        <a href="{% url 'delete_course' course.id %}">
-                            <button class="sub-danger-label" style="padding: 0px; width: 100px; margin-top: 5px;">
-                                <i class="fa-solid fa-trash-can"></i> Delete
-                            </button>
-                        </a>
-                        <a href="{% url 'edit_course' course.id %}">
-                            <button class="sub-label" style="padding: 0px; width: 100px; margin-top: 5px;">
-                                <i class="fa-solid fa-user-edit"></i> Edit
-                            </button>
-                        </a>
-                        <a href="{% url 'view_submissions' course.id %}">
-                            <button class="sub-label" style="padding: 0px; width: 100px; margin-top: 5px;">
-                                <i class="fa fa-eye"></i> View
-                            </button>
-                        </a>
-                    </td>
-                    {% endif %}
-                </tr>
-                {% endfor %}
-                </tbody>
-            </table>
-        </div>
+{% block title %}Courses - Mini LMS{% endblock %}
+
+{% block content %}
+<div class="px-4 py-8 sm:px-6 lg:px-8">
+
+  <!-- Page Header -->
+  <div class="mb-8">
+    <div class="sm:flex sm:items-center sm:justify-between">
+      <div>
+        <h1 class="text-2xl font-semibold text-gray-900">All Courses</h1>
+        <p class="mt-2 text-sm text-gray-600">View and manage all courses in the system</p>
+      </div>
+      {% if user.is_staff %}
+      <div class="mt-4 sm:mt-0">
+        <a href="{% url 'add_course' %}" class="inline-flex items-center gap-2 rounded-md bg-gray-900 px-4 py-2.5 text-sm font-semibold text-white hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2">
+          <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+          </svg>
+          Add New Course
+        </a>
+      </div>
+      {% endif %}
     </div>
+  </div>
+
+  <!-- Courses Table -->
+  <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+    <div class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+          <tr>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Course ID
+            </th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Course Title
+            </th>
+            {% if user.is_staff %}
+            <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Actions
+            </th>
+            {% endif %}
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+          {% for course in courses %}
+          <tr class="hover:bg-gray-50">
+            <!-- Course ID -->
+            <td class="px-6 py-4 whitespace-nowrap">
+              <span class="text-sm font-mono font-medium text-gray-900">{{ course.course_no }}</span>
+            </td>
+
+            <!-- Course Title -->
+            <td class="px-6 py-4">
+              <a href="{% url 'quizzes' course.id %}" class="text-sm font-medium text-gray-900 hover:text-gray-700 flex items-center gap-2 group">
+                <svg class="h-5 w-5 text-gray-400 group-hover:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                </svg>
+                <span class="underline">{{ course.course_title }}</span>
+              </a>
+            </td>
+
+            <!-- Actions (Staff Only) -->
+            {% if user.is_staff %}
+            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+              <div class="flex items-center justify-end gap-2">
+                <!-- View Submissions -->
+                <a href="{% url 'view_submissions' course.id %}" class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200" title="View Submissions">
+                  <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                  </svg>
+                  View
+                </a>
+
+                <!-- Edit -->
+                <a href="{% url 'edit_course' course.id %}" class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200" title="Edit Course">
+                  <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                  </svg>
+                  Edit
+                </a>
+
+                <!-- Delete -->
+                <a href="{% url 'delete_course' course.id %}" class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-white bg-red-600 rounded-md hover:bg-red-700" title="Delete Course">
+                  <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                  Delete
+                </a>
+              </div>
+            </td>
+            {% endif %}
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="{% if user.is_staff %}3{% else %}2{% endif %}" class="px-6 py-12 text-center">
+              <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+              </svg>
+              <h3 class="mt-2 text-sm font-medium text-gray-900">No courses available</h3>
+              <p class="mt-1 text-sm text-gray-500">
+                {% if user.is_staff %}
+                Get started by creating a new course.
+                {% else %}
+                No courses have been added yet.
+                {% endif %}
+              </p>
+              {% if user.is_staff %}
+              <div class="mt-6">
+                <a href="{% url 'add_course' %}" class="inline-flex items-center gap-2 rounded-md bg-gray-900 px-4 py-2 text-sm font-semibold text-white hover:bg-gray-800">
+                  <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                  </svg>
+                  Add Course
+                </a>
+              </div>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
 </div>
-{% if messages %}
-    <div id="popup-message-container">
-        {% for message in messages %}
-            <div class="popup-message {{ message.tags }}">
-                {{ message }}
-            </div>
-        {% endfor %}
-    </div>
-{% endif %}
 {% endblock %}

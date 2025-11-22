@@ -1,30 +1,100 @@
-{% extends 'base/main.html' %}
+{% extends 'base/base_with_sidebar.html' %}
 {% load static %}
-{% block title %}View Complaints{% endblock %}
+
+{% block title %}Complaints - Mini LMS{% endblock %}
+
 {% block content %}
-<div class="container">
-    <h2>Complaints</h2>
-    <div class="table-responsive">
-        <table class="table table-striped">
-            <thead>
-            <tr>
-                <th>Student Name</th>
-                <th>Student ID</th>
-                <th>Complaint</th>
-                <th>Submitted At</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for complaint in complaints %}
-            <tr>
-                <td>{{ complaint.student.first_name }} {{ complaint.student.last_name }}</td>
-                <td>{{ complaint.student.username }}</td>
-                <td>{{ complaint.complaint | safe }}</td>
-                <td>{{ complaint.submitted_at }}</td>
-            </tr>
-            {% endfor %}
-            </tbody>
-        </table>
+<div class="px-4 py-8 sm:px-6 lg:px-8">
+
+  <!-- Page Header -->
+  <div class="mb-8">
+    <div class="sm:flex sm:items-center sm:justify-between">
+      <div>
+        <h1 class="text-2xl font-semibold text-gray-900">Complaints</h1>
+        <p class="mt-2 text-sm text-gray-600">View and manage student complaints</p>
+      </div>
+      <div class="mt-4 sm:mt-0 flex items-center gap-3">
+        <span class="inline-flex items-center rounded-full bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700">
+          {{ complaints|length }} Complaint{{ complaints|length|pluralize }}
+        </span>
+        {% if not request.user.is_staff %}
+          <a href="{% url 'submit_complaint' %}" class="inline-flex items-center gap-2 rounded-md bg-gray-900 px-4 py-2 text-sm font-semibold text-white hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2">
+            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+            </svg>
+            Submit Complaint
+          </a>
+        {% endif %}
+      </div>
     </div>
+  </div>
+
+  <!-- Complaints List -->
+  <div class="space-y-4">
+    {% for complaint in complaints %}
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+      <!-- Complaint Header -->
+      <div class="border-b border-gray-200 px-6 py-4">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-4">
+            <!-- Student Avatar -->
+            <div class="flex-shrink-0 h-10 w-10 flex items-center justify-center rounded-full bg-gray-100">
+              <span class="text-sm font-medium text-gray-700">
+                {{ complaint.student.first_name|first }}{{ complaint.student.last_name|first }}
+              </span>
+            </div>
+
+            <!-- Student Info -->
+            <div>
+              <div class="text-sm font-medium text-gray-900">
+                {{ complaint.student.first_name }} {{ complaint.student.last_name }}
+              </div>
+              <div class="text-sm text-gray-500 font-mono">
+                {{ complaint.student.username }}
+              </div>
+            </div>
+          </div>
+
+          <!-- Submitted Date -->
+          <div class="text-right">
+            <div class="text-sm text-gray-900">{{ complaint.submitted_at|date:"M d, Y" }}</div>
+            <div class="text-xs text-gray-500">{{ complaint.submitted_at|date:"g:i A" }}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Complaint Content -->
+      <div class="px-6 py-6">
+        <div class="prose prose-sm max-w-none text-gray-700">
+          {{ complaint.complaint | safe }}
+        </div>
+      </div>
+    </div>
+    {% empty %}
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-12 text-center">
+      <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+      </svg>
+      <h3 class="mt-2 text-sm font-medium text-gray-900">No complaints submitted</h3>
+      <p class="mt-1 text-sm text-gray-500">
+        {% if request.user.is_staff %}
+          No students have submitted any complaints yet.
+        {% else %}
+          You haven't submitted any complaints yet.
+        {% endif %}
+      </p>
+      {% if not request.user.is_staff %}
+        <div class="mt-6">
+          <a href="{% url 'submit_complaint' %}" class="inline-flex items-center gap-2 rounded-md bg-gray-900 px-4 py-2 text-sm font-semibold text-white hover:bg-gray-800">
+            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+            </svg>
+            Submit Your First Complaint
+          </a>
+        </div>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
 </div>
 {% endblock %}

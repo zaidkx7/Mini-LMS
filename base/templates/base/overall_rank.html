@@ -1,76 +1,149 @@
-{% extends 'base/main.html' %}
+{% extends 'base/base_with_sidebar.html' %}
 {% load static %}
-{% block title %}Overall Rank{% endblock %}
+
+{% block title %}Overall Rankings - Mini LMS{% endblock %}
+
 {% block content %}
-<div class="container">
-    <h1 style="font-weight: bold; text-align: center; margin-top: 20px;"><i class="fa-solid fa-ranking-star"></i> Overall Ranking</h1>
-    <div class="table-responsive">
-    <table class="table table-striped">
-        <thead style="border-top: 3px solid black;">
-            <tr>
-                <th>Rank</th>
-                <th>Student ID</th>
-                <th>Student Name</th>
-                <th>Marks</th>
-                <th style="text-align: center;">Total Marks</th>
-            </tr>
+<div class="px-4 py-8 sm:px-6 lg:px-8">
+
+  <!-- Page Header -->
+  <div class="mb-8">
+    <div class="sm:flex sm:items-center sm:justify-between">
+      <div>
+        <h1 class="text-2xl font-semibold text-gray-900">Overall Rankings</h1>
+        <p class="mt-2 text-sm text-gray-600">Student rankings across all courses</p>
+      </div>
+      <div class="mt-4 sm:mt-0">
+        <span class="inline-flex items-center rounded-full bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700">
+          {{ rankings|length }} Student{{ rankings|length|pluralize }}
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Rankings Table -->
+  <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+    <div class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+          <tr>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Rank
+            </th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Student ID
+            </th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Student Name
+            </th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Marks Obtained
+            </th>
+            <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Total Possible
+            </th>
+          </tr>
         </thead>
-        <tbody>
-            {% for user in rankings %}
-            <tr>
-                {% if user.student__id == request.user.id %}
-                    {% if user.rank == 1 %}
-                        <td style="
-                        background-color: #28282B;
-                        color: #fff;">{{ user.rank }} <i class="fa-solid fa-trophy"></i></td>
-                    {% elif user.rank == 2 or user.rank == 3 %}
-                        <td style="
-                        background-color: #28282B;
-                        color: #fff;">{{ user.rank }} <i class="fa-solid fa-medal"></i></td>
-                    {% else %}
-                        <td style="
-                        background-color: #28282B;
-                        color: #fff;">{{ user.rank }}</td>
-                    {% endif %}
-                        <td style="
-                        background-color: #28282B;
-                        color: #fff;">{{ user.student__username }}</td>
-                        <td style="
-                        background-color: #28282B;
-                        color: #fff;">{{ user.first_name }} {{ user.last_name }}</td>
-                        <td style="
-                        background-color: #28282B;
-                        color: #fff;">{{ user.total_marks }}</td>
-                        <td style="
-                        background-color: #28282B;
-                        color: #fff;
-                        text-align: center;">{{ user.total_possible_marks }}</td>
-                {% else %}
-                    {% if user.rank == 1 %}
-                        <td>{{ user.rank }} <i class="fa-solid fa-trophy"></i></td>
-                    {% elif user.rank == 2 or user.rank == 3 %}
-                        <td>{{ user.rank }} <i class="fa-solid fa-medal"></i></td>
-                    {% else %}
-                        <td>{{ user.rank }}</td>
-                    {% endif %}
-                    <td>{{ user.student__username }}</td>
-                    <td>{{ user.first_name }} {{ user.last_name }}</td>
-                    <td>{{ user.total_marks }}</td>
-                    <td style="text-align: center;">{{ user.total_possible_marks }}</td>
+        <tbody class="bg-white divide-y divide-gray-200">
+          {% for user in rankings %}
+          <tr class="{% if user.student__id == request.user.id %}bg-gray-900 text-white hover:bg-gray-800{% else %}hover:bg-gray-50{% endif %}">
+            <!-- Rank -->
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="flex items-center gap-2">
+                <span class="text-sm font-semibold {% if user.student__id != request.user.id %}text-gray-900{% endif %}">
+                  {{ user.rank }}
+                </span>
+                {% if user.rank == 1 %}
+                  <svg class="h-5 w-5 {% if user.student__id == request.user.id %}text-yellow-300{% else %}text-yellow-500{% endif %}" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                  </svg>
+                {% elif user.rank == 2 %}
+                  <svg class="h-5 w-5 {% if user.student__id == request.user.id %}text-gray-300{% else %}text-gray-400{% endif %}" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                  </svg>
+                {% elif user.rank == 3 %}
+                  <svg class="h-5 w-5 {% if user.student__id == request.user.id %}text-amber-300{% else %}text-amber-600{% endif %}" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                  </svg>
                 {% endif %}
-            </tr>
-            {% endfor %}
+              </div>
+            </td>
+
+            <!-- Student ID -->
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="text-sm font-mono font-medium {% if user.student__id != request.user.id %}text-gray-900{% endif %}">
+                {{ user.student__username }}
+              </div>
+            </td>
+
+            <!-- Student Name -->
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="text-sm font-medium {% if user.student__id != request.user.id %}text-gray-900{% endif %}">
+                {{ user.first_name }} {{ user.last_name }}
+                {% if user.student__id == request.user.id %}
+                  <span class="ml-2 inline-flex items-center rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-800">
+                    You
+                  </span>
+                {% endif %}
+              </div>
+            </td>
+
+            <!-- Marks Obtained -->
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="text-sm font-semibold {% if user.student__id != request.user.id %}text-gray-900{% endif %}">
+                {{ user.total_marks }}
+              </div>
+            </td>
+
+            <!-- Total Possible -->
+            <td class="px-6 py-4 whitespace-nowrap text-center">
+              <span class="inline-flex items-center rounded-full {% if user.student__id == request.user.id %}bg-gray-700 text-white{% else %}bg-gray-100 text-gray-700{% endif %} px-3 py-1 text-xs font-medium">
+                {{ user.total_possible_marks }}
+              </span>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="5" class="px-6 py-12 text-center">
+              <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+              </svg>
+              <h3 class="mt-2 text-sm font-medium text-gray-900">No rankings available</h3>
+              <p class="mt-1 text-sm text-gray-500">There are no student rankings to display.</p>
+            </td>
+          </tr>
+          {% endfor %}
         </tbody>
-    </table>
+      </table>
     </div>
+  </div>
+
+  <!-- Legend -->
+  <div class="mt-6 bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+    <div class="flex items-center gap-6 text-sm text-gray-600">
+      <div class="flex items-center gap-2">
+        <svg class="h-5 w-5 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+        </svg>
+        <span>1st Place</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <svg class="h-5 w-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+        </svg>
+        <span>2nd Place</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <svg class="h-5 w-5 text-amber-600" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+        </svg>
+        <span>3rd Place</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <div class="h-4 w-16 bg-gray-900 rounded"></div>
+        <span>Your Rank</span>
+      </div>
+    </div>
+  </div>
 </div>
-{% if messages %}
-    <div id="popup-message-container">
-        {% for message in messages %}
-            <div class="popup-message {{ message.tags }}">
-                {{ message }}
-            </div>
-        {% endfor %}
-    </div>
-{% endif %}
 {% endblock %}
